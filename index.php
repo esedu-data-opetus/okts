@@ -22,7 +22,7 @@ if(!isset($_SESSION)) {
   ?>
         <meta charset="UTF-8">
         <title>Testikysely</title>
-         <script src="./jquery-2.1.3.js"> </script>
+         <script src="./jquery-2.1.3.min.js"> </script>
         <script src="./index.js"> </script>
         <link href="amaz.css" rel="stylesheet" type="text/css"/>
     </head>
