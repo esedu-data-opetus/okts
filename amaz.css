@@ -1,0 +1,25 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 14.4.2015, 13:53:19
+    Author     : simo.savela
+*/
+
+body{
+    font-size: 50px;
+}
+ input[type=radio] {
+    margin-top: 2px;
+    border: 0px;
+    width:40px;
+    height: 40px;
+}
+
+button{
+    width:10em;
+    height: 5em;
+    margin-left:10px;
+}
