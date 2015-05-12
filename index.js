@@ -1,11 +1,12 @@
-
+﻿
 $( document ).ready(function() {
     
-    var php_url = "http://localhost/PhpProject1/test.php";
+    var php_url = "http://paja.esedu.fi/okts/test.php";
     
     console.log( "ready!" );
     $('#sub-button').hide();
         $('#report-button').hide();
+        $('#joniboi').hide();
         $('#cat-button').hide();
         var tempvar = {"action": "kategoriat"};
             tempvar = $(this).serialize() + "&" + $.param(tempvar);
@@ -25,21 +26,25 @@ $( document ).ready(function() {
 
                     }
                 array.push('</div>');
-                 $("#vastaus").append(array.join(''));}});
+                 $("#vastaus").append(array.join(''));
+             $('#vastaus').prepend('<span class="err">Valitse kategoriat</span>');}});
 
 
     var data= "";
     var kysid;
+    
     $('#meemies').click(function() {
-        $('#meemies').hide();
-        $('#cat-button').show();
-        $('#report-button').show();
+        
     data={
         "action": "aloita",
         "kategoria": GetVal("kategoria")
             };
             data = $(this).serialize() + "&" + $.param(data);
-            
+            var ses = GetVal("kategoria");
+            if(ses.length>0){
+                $('#meemies').hide();
+        $('#cat-button').show();
+        $('#report-button').show();
             $.ajax({
         method: "POST",
             dataType: "json",
@@ -49,7 +54,11 @@ $( document ).ready(function() {
             success:function( lod ) {
                 console.log(lod);
                 $('#checkboxdiv').hide();
-        $('#vastaus').html(lod['catname']);}});});
+        $('#vastaus').html(lod['catname']);
+            }});}
+    else{$('.err').css('color', 'red');}
+});
+        
 
     $('#cat-button').click(function() {
         $('#cat-button').hide();
@@ -60,6 +69,15 @@ $( document ).ready(function() {
     
 $('#sub-button').click(function() {
         data_json("seuraavakys");
+        ajax_haekys(data);
+    });   
+    
+$('#joniboi').click(function() {
+        data={
+                "action": "vaihdatunus",
+                "value":$('#nick').val(),
+            };
+            data = $(this).serialize() + "&" + $.param(data);
         ajax_haekys(data);
     });    
 
@@ -73,7 +91,6 @@ $('#report-button').click(function() {
     $(':input[name="' + val + '"]').each(function () {
         if (this.checked) {
             arr.push($(this).attr('value'));}});
-    console.log(arr);
         return arr;
         
 }
@@ -96,7 +113,13 @@ $('#report-button').click(function() {
             cache: false,
             success:function( data ) {
                 if(data['loppu']==="end"){
-                    $('#vastaus').html('Testi loppui, sait '+data['log2']+' pistettä, olit kirjautunut vierastunnuksella '+data['usr']);
+                    if(data['vaihto']===1){
+                    $('#vastaus').html('Tunnus vaihdettu onnistuneesti, testi tallennettu tunnuksella '+data['usr']+'<br>');
+                    }
+                    else{$('#vastaus').html('Testi loppui, sait '+data['log2']+' pistettä, testi tallenettu vierastunnuksella '+data['usr']+'<br>');}
+                   
+                    $('#vastaus').append('<input id="nick" type="text" />');
+                    $('#joniboi').show();
                     $('#sub-button').hide();
         $('#report-button').hide();
         return;

@@ -21,6 +21,7 @@ if (is_ajax()) {
         $_SESSION['vastattu']--;};hae_kysymys(); break;
       case "aloita":luotesti();break;
       
+      case "vaihdatunus": vaihda_tunnus(); break;
       case "ses": ses_function(); break;
       case "drag": drag_function(); break;
     }
@@ -32,10 +33,6 @@ function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
-function json_return($array){
-    $array["json"] = json_encode($array);
-return html_entity_decode(json_encode($encodedArray));
-}
 
 function hae_kategoria(){
     
@@ -218,6 +215,7 @@ return;
                 $return['usr']=$_SESSION['user'];
                 $return["kysenum"]=$_SESSION['kysenum'];
             $return["log2"]=$pistevar;
+            $_SESSION['pisteet']=$pistevar;
         } else {$return['catval']="joo";
         $return['catname']=utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
         
@@ -226,6 +224,22 @@ return;
 echo html_entity_decode(json_encode($return));
   }
 
+  
+  function vaihda_tunnus(){
+      global $dbcon;
+      $return = $_POST;
+       $sql = "UPDATE testit SET usr = '".$return['value']."' where testid = ".$_SESSION['testid'];
+    if ($dbcon->query($sql) === TRUE) {$return['usr']=$return['value'];$return['vaihto']=1;
+} else {
+    $return['error']='SQL-pyyntö epäonnistui';
+}    
+$return['loppu']='end';
+echo html_entity_decode(json_encode($return));
+  }
+  
+  
+  
+  
 
 function drag_function(){
 $return = $_POST;
@@ -263,26 +277,16 @@ else
 function ses_function(){
     $return = $_POST;
     
-    $asd1="KRIPP DAY9 TRUMP REYNAD";
-    $asd2="ytfh-Bad.png";
-    $asd3="photo.jpg";
-    $asd4="4-0SEN.jpg";
-    $asd5="hearthstone-q-and-a-kripparrian.jpg";
-    $asd6="1h31x.jpg";
-    $asd7="28443-1413637422.jpg";
-    $asd8="_ppmceow_400x400.jpeg";
-    $asd9="maxresdefault.jpg";
-
-    $return["kyse"]=$asd1;
-    $return["kuve1"]=$asd2;
-    $return["kuve2"]=$asd3;
-    $return["kuve3"]=$asd4;
-    $return["kuve4"]=$asd5;
-    $return["kuve5"]=$asd6;
-    $return["kuve6"]=$asd7;
-    $return["kuve7"]=$asd8;
-    $return["kuve8"]=$asd9; 
+    $return["kyse"]="KRIPP DAY9 TRUMP REYNAD";
+    $return["kuve1"]="ytfh-Bad.png";
+    $return["kuve2"]="photo.jpg";
+    $return["kuve3"]="4-0SEN.jpg";
+    $return["kuve4"]="hearthstone-q-and-a-kripparrian.jpg";
+    $return["kuve5"]="1h31x.jpg";
+    $return["kuve6"]="28443-1413637422.jpg";
+    $return["kuve7"]="_ppmceow_400x400.jpeg";
+    $return["kuve8"]="maxresdefault.jpg";
     
-echo(json_return($return));
+echo html_entity_decode(json_encode($return));
 }
 ?>
