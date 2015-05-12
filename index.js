@@ -1,4 +1,4 @@
-﻿
+
 $( document ).ready(function() {
     
     var php_url = "http://paja.esedu.fi/okts/test.php";
@@ -137,7 +137,8 @@ $('#report-button').click(function() {
               array.push('<input id="rad1" name="vast" type=radio value="1"  />'+data["ans1"]+'<br>');
               array.push('<input id="rad2" name="vast" type=radio value="2"/>'+data["ans2"]+'<br>');
               array.push('<input id="rad3" name="vast" type=radio value="3"/>'+data["ans3"]+'<br>');
-              array.push('<input id="rad4" name="vast" type=radio value="4"/>'+data["ans4"]+'<br></div>');
+              array.push('<input id="rad4" name="vast" type=radio value="4"/>'+data["ans4"]+'<br>');
+              array.push('<input id="rad5" name="vast" type=radio value="5"/>En halua vastata<br></div>');
               $("#vastaus").html(array.join(''));
               kysid = data['q_id'];
               if (typeof(data['prevans']) !== "undefined" && data['prevans'] !== null)

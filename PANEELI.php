@@ -77,19 +77,9 @@ $katerr = "";
               }
         
         
-        
-        
-        
-        
-       
-        
-   
-       
-        
 
 if(isset($_FILES['upload']['name']))
 	{
-
  if(!$_FILES['upload']['error'])
     {
 
