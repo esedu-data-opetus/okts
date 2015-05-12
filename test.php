@@ -199,7 +199,7 @@ return;
         $tempvar = $_SESSION['vastattu'] - 1;
         $tempvar2 = 1;
         $pistevar = 0;
-        $sql = "UPDATE testit SET vastattu = '".$tempvar ."' where testid = ".$_SESSION['testid'];
+        $sql = "UPDATE testit SET vastattu = '".$tempvar ."',finnish = now() where testid = ".$_SESSION['testid'];
         if ($dbcon->query($sql) === TRUE) {}
         for ($i = $tempvar; $i>0 ;$i--){
         $sesos = "kys".$tempvar2;
@@ -217,7 +217,11 @@ return;
                 $return["kysenum"]=$_SESSION['kysenum'];
             $return["log2"]=$pistevar;
             $_SESSION['pisteet']=$pistevar;
-        } else {$return['catval']="joo";
+            $sql = "update testit set aika = TIMESTAMPDIFF(second,testit.start,testit.finnish) where testit.testid = ".$_SESSION['testid'];
+    if ($dbcon->query($sql) === TRUE) {} 
+        } 
+        
+        else {$return['catval']="joo";
         $return['catname']=utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
         
         }
