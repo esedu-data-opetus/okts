@@ -30,7 +30,7 @@ if(!isset($_SESSION)) {
         
         <button id="meemies">ALOITA TESTI</button>
         <div id="vastaus"></div>
-        <button id="cat-button">aloita</button><button id="sub-button">subscribe</button><button id="report-button">report</button>
+        <button id="cat-button">aloita</button><button id="joniboi">Vaihda tunnus</button><button id="sub-button">subscribe</button><button id="report-button">report</button>
         <div id="meemi"></div>
     </body>
 </html>
