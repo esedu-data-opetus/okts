@@ -44,7 +44,6 @@ $( document ).ready(function() {
             if(ses.length>0){
                 $('#meemies').hide();
         $('#cat-button').show();
-        $('#report-button').show();
             $.ajax({
         method: "POST",
             dataType: "json",
@@ -63,13 +62,18 @@ $( document ).ready(function() {
     $('#cat-button').click(function() {
         $('#cat-button').hide();
         $('#sub-button').show();
+        $('#report-button').show();
         data_json("ekakys");
         ajax_haekys(data);
     });    
     
 $('#sub-button').click(function() {
+    
+    var tempvar = $('input:radio[name=vast]:checked').val();
+    if (typeof tempvar === "undefined") {}
+    else{
         data_json("seuraavakys");
-        ajax_haekys(data);
+        ajax_haekys(data);};
     });   
     
 $('#joniboi').click(function() {
@@ -124,8 +128,9 @@ $('#report-button').click(function() {
         $('#report-button').hide();
         return;
                 }if(data['catval']==="joo"){
-                    $('#show-button').hide();
-        $('#hide-button').show();
+                    $('#report-button').hide();
+                    $('#sub-button').hide();
+        $('#cat-button').show();
         $('#vastaus').html(data['catname']);
         return;
                 }else{

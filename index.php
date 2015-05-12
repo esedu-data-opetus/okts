@@ -10,7 +10,7 @@ and open the template in the editor.
 // Inialize session
 if(!isset($_SESSION)) {
      session_start();
-     $_SESSION['kysenum'] = 1;
+     $_SESSION['kysenum'] = 0;
      $_SESSION['pisteet'] = 0;
      $_SESSION['user'] = "";
      $_SESSION['id']="";

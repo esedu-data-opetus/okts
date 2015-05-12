@@ -15,7 +15,7 @@ if (is_ajax()) {
         case "kategoriat": hae_kategoria();break;
         
       case "seuraavakys": tark_vast();$_SESSION['kysenum']++;$_SESSION['vastattu']++;hae_kysymys(); break;
-        case "ekakys" : hae_kysymys();break;
+        case "ekakys" : $_SESSION['kysenum']++;hae_kysymys();break;
       case "viimekys": tark_vast();if($_SESSION['kysenum']>1){
         $_SESSION['kysenum']--;}if($_SESSION['vastattu']>1){
         $_SESSION['vastattu']--;};hae_kysymys(); break;
@@ -199,7 +199,8 @@ return;
         $tempvar = $_SESSION['vastattu'] - 1;
         $tempvar2 = 1;
         $pistevar = 0;
-        
+        $sql = "UPDATE testit SET vastattu = '".$tempvar ."' where testid = ".$_SESSION['testid'];
+        if ($dbcon->query($sql) === TRUE) {}
         for ($i = $tempvar; $i>0 ;$i--){
         $sesos = "kys".$tempvar2;
         $soses = "ans".$tempvar2;
