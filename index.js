@@ -1,7 +1,7 @@
 
 $( document ).ready(function() {
     
-    var php_url = "http://paja.esedu.fi/okts/test.php";
+    var php_url = "http://localhost/PhpProject1/test.php";
     
     console.log( "ready!" );
     $('#sub-button').hide();
@@ -53,10 +53,8 @@ $( document ).ready(function() {
             success:function( lod ) {
                 console.log(lod);
                 $('#checkboxdiv').hide();
-        $('#vastaus').html(lod['catname']);
-            }});}
-    else{$('.err').css('color', 'red');}
-});
+        $('#vastaus').html(lod['catname']);}});}
+    else{$('.err').css('color', 'red');}});
         
 
     $('#cat-button').click(function() {
@@ -73,16 +71,16 @@ $('#sub-button').click(function() {
     if (typeof tempvar === "undefined") {}
     else{
         data_json("seuraavakys");
-        ajax_haekys(data);};
-    });   
+        ajax_haekys(data);};});   
     
 $('#joniboi').click(function() {
+    if (typeof $('#nick').val() !== undefined){
         data={
                 "action": "vaihdatunus",
-                "value":$('#nick').val(),
+                "value":$('#nick').val()
             };
             data = $(this).serialize() + "&" + $.param(data);
-        ajax_haekys(data);
+        ajax_haekys(data);}
     });    
 
 $('#report-button').click(function() {

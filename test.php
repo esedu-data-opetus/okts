@@ -50,10 +50,9 @@ $temparray = array("id"=>array(),"name"=>array());
 foreach($rows as $row)
     
 {$temparray['id'][$i]=$row['catid'];$temparray['name'][$i]=$row['catname'];$i++;}
-$temparray['name'] = array_map('utf8_encode',$temparray['name']);
+//$temparray['name'] = array_map('utf8_encode',$temparray['name']);
 $return['catarray'] = $temparray;
 $return['catmaara'] = $i;
-
 echo html_entity_decode(json_encode($return));
 
 }
@@ -104,7 +103,9 @@ $temp_id = uniqid();
 $_SESSION['testid']=$row['testid'];
          }    
          
-         $return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+         //jostain syystä utf8_encode palauttaa huonoja kirjaimia
+         //$return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+         $return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
          
 echo html_entity_decode(json_encode($return));
          
@@ -154,8 +155,10 @@ $return["kysenum"]=$_SESSION['kysenum'];
   		while($row = $result->fetch_assoc())
          {
                     $return["q_id"]= $row['id'];
-$return["ans1"]=utf8_encode($row['ans']);
-$return["kysymys"]=utf8_encode($row['titleq']);
+//$return["ans1"]=utf8_encode($row['ans']);
+$return["ans1"]=$row['ans'];
+//$return["kysymys"]=utf8_encode($row['titleq']);
+$return["kysymys"]=$row['titleq'];
 $return["kuve"]=$row['image'];
          }
          
@@ -164,19 +167,31 @@ JOIN vastasukset vas ON kys.answer2=vas.ansid and id = ".$_SESSION['kysejar'][(i
 
       $result2 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
   		while($row = $result2->fetch_assoc())
-         {$return["ans2"]=utf8_encode($row['ans']);}
+         {
+                    //$return["ans2"]=utf8_encode($row['ans']);
+                    $return["ans2"]=$row['ans'];
+         
+         }
                  $query = "SELECT * FROM kysymys kys
 JOIN vastasukset vas ON kys.answer3=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
 
       $result3 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
   		while($row = $result3->fetch_assoc())
-         {$return["ans3"]=utf8_encode($row['ans']);}
+                  {
+                    //$return["ans3"]=utf8_encode($row['ans']);
+                    $return["ans3"]=$row['ans'];
+         
+         }
                  $query = "SELECT * FROM kysymys kys
 JOIN vastasukset vas ON kys.answer4=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
 
       $result4 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
   		while($row = $result4->fetch_assoc())
-         {$return["ans4"]=utf8_encode($row['ans']);}
+                  {
+                    //$return["ans4"]=utf8_encode($row['ans']);
+                    $return["ans4"]=$row['ans'];
+         
+         }
 
 $sesos = "ans".$_SESSION['vastattu'];
     $sql = "select * from testit where testid = ".$_SESSION['testid'];
@@ -222,7 +237,8 @@ return;
         } 
         
         else {$return['catval']="joo";
-        $return['catname']=utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+        //$return['catname']=utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+        $return['catname']=$_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
         
         }
 
