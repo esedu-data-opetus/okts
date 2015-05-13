@@ -10,6 +10,6 @@ define('DBNAME','amaz');
 $dbcon= mysqli_connect(HOST,USER,PASS,DBNAME);
 
 if (mysqli_connect_errno())	{echo "Yhteys tietokantaan ei onnistu.<br>";}
-// else 					{*/echo "Yhteys tietokantaan muodostettu.<br>";}
 
+$query = $dbcon->query("SET NAMES utf8");
 ?>
