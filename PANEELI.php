@@ -1,5 +1,5 @@
 ﻿<?php
-include 'dbconnect.php';  
+include './conn/dbconnect.php';  
 
 
 $kysymys ="";
@@ -158,15 +158,15 @@ $ansid4="";
               
 Kysymys:<input type="text" name="kysymys"> 
 <br> <div id="err"> <?php echo $kyserr; ?> </div> <br>
-Vastaukset <div id="err"> <?php echo $valueerr; ?> </div>  <br><br>
+Vastaukset <div id="err"> <?php echo $valueerr; ?> </div>    
 Vastaus1: <input type="text" name="ans1"><input type="radio" name="value" value="1" id="1"><label for="1" value="1">Oikea vastaus</label>
-<br> <div id="err"> <?php echo $ans1err; ?> <br> </div>
+<br> <div id="err"> <?php echo $ans1err; ?></div>
 Vastaus2: <input type="text" name="ans2"><input type="radio" name="value" value="2" id="2"><label for="2" value="2">Oikea vastaus</label>
-<br> <div id="err"> <?php echo $ans2err; ?> </div> <br>
+<br> <div id="err"> <?php echo $ans2err; ?> </div>
 Vastaus3: <input type="text" name="ans3"><input type="radio" name="value" value="3" id="3"><label for="3" value="3">Oikea vastaus</label>
-<br> <div id="err"> <?php echo $ans3err; ?> </div> <br>
+<br> <div id="err"> <?php echo $ans3err; ?> </div> 
 Vastaus4: <input type="text" name="ans4"><input type="radio" name="value" value="4" id="4"><label for="4" value="4">Oikea vastaus</label>
-<br> <div id="err"> <?php echo $ans4err; ?> </div> <br> 
+<br> <div id="err"> <?php echo $ans4err; ?> </div>
 
 <select name="kategoria">
     <?php
@@ -175,7 +175,7 @@ Vastaus4: <input type="text" name="ans4"><input type="radio" name="value" value=
 		echo "<option value='".$row->catid."'>".$row->catname."</option>";
                 }
     ?>  
-</select> <div id="err"> <?php echo $katerr; ?> </div> <br> <br>
+</select> <div id="err"> <?php echo $katerr; ?> </div>
     <label for="image">Kuva:</label>
     <input type="file" name="upload"><br>
 	<input type="submit" name="submit" value="Submit" />
