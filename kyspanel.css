@@ -1,0 +1,35 @@
+.table {
+			  	display: block;
+			  	width: 90%;
+			}
+			.theading, .tableBody, .tableFoot, .row{
+			  	clear: both;
+			}
+			.thead, .tableFoot, .theaddemo{
+			  	background-color: #DDD;
+			  	font-weight: bold;
+			}
+			.cell, .celldemo, .thead, .theaddemo {
+			  	border: 1px solid #999999;
+			  	float: left;
+			  	height: 34px;
+			  	overflow: hidden;
+			  	padding: 5px 5px 5px 5px ;
+			  	width: 10%;
+			}
+                        .theaddemo, .celldemo{
+                                width:3%;
+                        }
+			.table:after {
+			  	 visibility: hidden;
+			  	 display: block;
+			  	 font-size: 0;
+			  	 content: " ";
+			  	 clear: both;
+			  	 height: 0;
+			}
+                        
+                        #qweww{
+                            min-height:20px;
+                            color:red;
+                        }

@@ -1,7 +1,7 @@
 
 $( document ).ready(function() {
     
-    var php_url = "http://localhost/PhpProject1/test.php";
+    var php_url = "./test.php";
     
     console.log( "ready!" );
     $('#sub-button').hide();
@@ -62,8 +62,7 @@ $( document ).ready(function() {
         $('#sub-button').show();
         $('#report-button').show();
         data_json("ekakys");
-        ajax_haekys(data);
-    });    
+        ajax_haekys(data);});    
     
 $('#sub-button').click(function() {
     
@@ -71,31 +70,28 @@ $('#sub-button').click(function() {
     if (typeof tempvar === "undefined") {}
     else{
         data_json("seuraavakys");
-        ajax_haekys(data);};});   
+        ajax_haekys(data);};});
     
 $('#joniboi').click(function() {
-    if (typeof $('#nick').val() !== undefined){
+    if ($('#nick').val() !== ""){
+        console.log($('#nick').val());
         data={
                 "action": "vaihdatunus",
                 "value":$('#nick').val()
-            };
+            }; 
             data = $(this).serialize() + "&" + $.param(data);
-        ajax_haekys(data);}
-    });    
+        ajax_haekys(data);}});    
 
 $('#report-button').click(function() {
         data_json("viimekys");
-        ajax_haekys(data);
- });
+        ajax_haekys(data);});
  
  function GetVal(val) {
     var arr = new Array();
     $(':input[name="' + val + '"]').each(function () {
         if (this.checked) {
             arr.push($(this).attr('value'));}});
-        return arr;
-        
-}
+        return arr;}
  
  function data_json(action) {   
             data={
@@ -103,8 +99,7 @@ $('#report-button').click(function() {
                 "value":$('input:radio[name=vast]:checked').val(),
                 "kysid": kysid
             };
-            data = $(this).serialize() + "&" + $.param(data);
-        };
+            data = $(this).serialize() + "&" + $.param(data);};
         
     function ajax_haekys(func_data){
     $.ajax({

@@ -22,6 +22,8 @@ if (is_ajax()) {
       case "aloita":luotesti();break;
       
       case "vaihdatunus": vaihda_tunnus(); break;
+      case "haecat_pan": hae_kategoria_paneeli(); break;
+      case "bennys": muuta_demo(); break;
       case "ses": ses_function(); break;
       case "drag": drag_function(); break;
     }
@@ -33,6 +35,30 @@ function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
+function hae_kategoria_paneeli(){
+    global $dbcon;
+    $return = $_POST;
+    
+    $query = "select * from kysymys where category = ".$return['kategoria'];
+    $result = $dbcon->query($query);
+    while($row = $result->fetch_array()){
+        $temparray[] = $row;
+    }
+    foreach($temparray as &$temp){
+        for ($i=1;$i<5;$i++){
+            $str = "answer".$i;
+            $query = "SELECT * FROM vastasukset where ansid='".$temp[$str]."'";
+            $result2 = $dbcon->query($query);
+            while($row = $result2->fetch_array()){
+                $temp[$str]=$row['ans'];
+            }
+        }
+    }
+    
+    $return['catarray']=$temparray;
+   
+    echo html_entity_decode(json_encode($return));
+}
 
 function hae_kategoria(){
     
@@ -71,7 +97,7 @@ $result = $dbcon->query($query);
 while($row = $result->fetch_array())
         {$catname= $row['catname'];}
         
-    $query = "select * from kysymys where category = ".$cat." order by rand() limit ".$_SESSION['kyspercat'];
+    $query = "select * from kysymys where category = ".$cat." and demokys = 1 limit ".$_SESSION['kyspercat'];
 $result = $dbcon->query($query);
 $rows='';
 while($row = $result->fetch_array())
@@ -258,6 +284,19 @@ $return['loppu']='end';
 echo html_entity_decode(json_encode($return));
   }
   
+  
+  function muuta_demo(){
+      global $dbcon;
+      $return = $_POST;
+      
+      $sql = "UPDATE kysymys SET demokys = '".$return['value']."' where id ='".$return['id']."'";
+    if ($dbcon->query($sql) === TRUE) {$return['joo'] = 'Tietokanta päivitetty';
+} else {
+    $return['joo'] = "Error: " . $sql . "<br>" . $dbcon->error;
+}   
+
+echo html_entity_decode(json_encode($return));
+  }
   
   
   
