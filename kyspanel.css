@@ -29,7 +29,9 @@
 			  	 height: 0;
 			}
                         
-                        #qweww{
+                        #qweww, #ewqewq{
                             min-height:20px;
                             color:red;
+                            display:inline;
                         }
+                        

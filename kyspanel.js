@@ -68,9 +68,23 @@ $( document ).ready(function() {
     });
     
     $('body').on('change', '.dcb', function(){
-        var temp=0;
+         var temp=0;
         if (this.checked)
         {temp = 1}
+        else {
+            var i = 0;
+            $('.dcb').each( function() {
+                if (this.checked)
+                    {i++;}
+            });
+            console.log(i);
+            if (i!==5){
+                $("#ewqewq").flash_message({
+                    text: 'demotestissä täytyy olla 5 kysymystä',
+                    how: 'append'
+                });
+            }        
+        }
         var data = {
             action:'bennys',
             id:this.value,             
@@ -86,12 +100,13 @@ $( document ).ready(function() {
             success:function( data ) {
                 console.log(data['joo']);
                 $("#qweww").flash_message({
-        text: data['joo'],
-        how: 'append'
-    });
+                    text: data['joo'],
+                    how: 'append'
+                });
             }});
     });
-    (function($) {
+    
+(function($) {
     $.fn.flash_message = function(options) {
       
       options = $.extend({
@@ -119,4 +134,5 @@ $( document ).ready(function() {
       });
     };
 })(jQuery);
+
 });

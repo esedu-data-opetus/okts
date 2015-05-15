@@ -12,6 +12,6 @@
                    echo "<option value='".$row->catid."'>".$row->catname."</option>";
                 }
     ?>  
-</select> <div id="qweww"></div>
+</select> <div id="qweww"></div><div id="ewqewq"></div>
 
 <div id="asdid"></div>
