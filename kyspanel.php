@@ -1,9 +1,9 @@
 <?php
     include ('./conn/dbconnect.php');
 ?>
-<link href="kyspanel.css" rel="stylesheet" type="text/css"/>
-<script src="jquery-2.1.3.min.js" type="text/javascript"></script>
-<script src="kyspanel.js" type="text/javascript"></script>
+<link href="./kyspanel.css" rel="stylesheet" type="text/css"/>
+<script src="./jquery-2.1.3.min.js" type="text/javascript"></script>
+<script src="./kyspanel.js" type="text/javascript"></script>
 <select name="kategoria" id="alleycatblues">
     <option value=""> </option>
     <?php

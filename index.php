@@ -27,10 +27,14 @@ if(!isset($_SESSION)) {
         <link href="amaz.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
+        <img src="./esedu.png" class="logo"/>
+        <h1 class="title">Osaamiskartoitustesti</h1>
+        <div class="inbox">
+            <button id="meemies">ALOITA TESTI</button>
         
-        <button id="meemies">ALOITA TESTI</button>
         <div id="vastaus"></div>
         <button id="cat-button">aloita</button><button id="joniboi">Vaihda tunnus</button><button id="sub-button">subscribe</button><button id="report-button">report</button>
         <div id="meemi"></div>
+        </div>
     </body>
 </html>

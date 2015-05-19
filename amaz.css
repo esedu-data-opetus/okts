@@ -10,6 +10,7 @@ and open the template in the editor.
 
 body{
     font-size: 50px;
+    background: yellowgreen;
 }
  input[type=radio] {
     margin-top: 2px;
@@ -22,4 +23,58 @@ button{
     width:10em;
     height: 5em;
     margin-left:10px;
+}
+
+p{
+    font-size:20px;
+}
+
+a:link{color:white;}
+
+a:visited{color:white;}
+
+a:hover{color:white;}
+
+a:active{color:white}
+
+.logo{
+    width:15%;
+    height:15%;
+    left: 50%;
+    margin-left:-190px;
+    position:relative;
+}
+.title{
+    position:relative;
+    left:50%;
+    color: #4BAD32;
+    font-size: 55%;
+    margin-left:-195px;
+    margin-top:0px;
+    text-shadow:-2px 1px  #3c763d;
+}
+
+button{
+border-radius: 12px; 
+-moz-border-radius: 12px; 
+-webkit-border-radius: 12px; 
+border: 2px solid #3C763D;
+  background-image: -webkit-linear-gradient(top, #fff 0%, #e0e0e0 100%);
+  background-image:      -o-linear-gradient(top, #fff 0%, #e0e0e0 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#e0e0e0));
+  background-image:         linear-gradient(to bottom, #fff 0%, #e0e0e0 100%);
+}
+
+.inbox{
+    border-style:solid;
+    border-width:5px;
+    padding: 10px;
+    margin-left:200px;
+    margin-right:200px;
+    margin-top:0px;
+    height:700px;
+    border-color: #3c763d;
+    border-radius: 25px;
+    background: white;
+    
 }

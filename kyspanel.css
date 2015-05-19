@@ -1,6 +1,5 @@
-.table {
+                        .table {
 			  	display: block;
-			  	width: 90%;
 			}
 			.theading, .tableBody, .tableFoot, .row{
 			  	clear: both;
@@ -8,18 +7,27 @@
 			.thead, .tableFoot, .theaddemo{
 			  	background-color: #DDD;
 			  	font-weight: bold;
+                                text-align:center;
 			}
 			.cell, .celldemo, .thead, .theaddemo {
-			  	border: 1px solid #999999;
+                            border: 1px solid black;
+                            padding: 2px 2px 2px 2px;
 			  	float: left;
-			  	height: 34px;
-			  	overflow: hidden;
-			  	padding: 5px 5px 5px 5px ;
-			  	width: 10%;
+			  	overflow: auto;
+			  	width: 12%;
+                                height:36px;
+                                
 			}
+                        
                         .theaddemo, .celldemo{
                                 width:3%;
                         }
+                        .celldemo {
+                            padding: 12px 2px 12px 2px;
+                            text-align: center;
+                            height: 16;
+                            overflow: hidden;
+                          }
 			.table:after {
 			  	 visibility: hidden;
 			  	 display: block;

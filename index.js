@@ -129,7 +129,7 @@ $('#report-button').click(function() {
                 }else{
                     var array = [];
                 if (data["kuve"] !== "")
-                {array.push( '<div id="kuve"><img id="joo" src="'+data["kuve"]+'"></img></div>');};
+                {array.push( '<div id="kuve"><img id="joo" src="./img/'+data["kuve"]+'"></img></div>');};
               array.push('<div id="kyse">');
                     array.push(data["kysymys"]+'<br>');
               array.push('<input id="rad1" name="vast" type=radio value="1"  />'+data["ans1"]+'<br>');

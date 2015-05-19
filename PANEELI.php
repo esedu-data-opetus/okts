@@ -82,7 +82,8 @@ if(isset($_FILES['upload']['name']))
 	{
  if(!$_FILES['upload']['error'])
     {
-
+	$upload_kansio = "./img/";
+	
 $new_file_name = strtolower($_FILES['upload']['tmp_name']); //rename file
         $image_type = $_FILES['upload']['type'];
         $basename0 = "." . basename ($image_type);
@@ -90,7 +91,7 @@ $new_file_name = strtolower($_FILES['upload']['tmp_name']); //rename file
 
 
         $qwdf = $_FILES['upload']['tmp_name'];
-                    move_uploaded_file($qwdf, $basename1);
+                    move_uploaded_file($qwdf, $upload_kansio.$basename1);
                     $message = 'Your file was accepted.';
             echo $basename1 , " " , $basename0;
     

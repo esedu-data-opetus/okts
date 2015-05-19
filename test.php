@@ -13,19 +13,21 @@ if (is_ajax()) {
     
     switch($action) { //Switch case for value of action
         case "kategoriat": hae_kategoria();break;
-        
-      case "seuraavakys": tark_vast();$_SESSION['kysenum']++;$_SESSION['vastattu']++;hae_kysymys(); break;
+        case "seuraavakys": tark_vast();
+            $_SESSION['kysenum']++;$_SESSION['vastattu']++;
+            hae_kysymys(); break;
         case "ekakys" : $_SESSION['kysenum']++;hae_kysymys();break;
-      case "viimekys": tark_vast();if($_SESSION['kysenum']>1){
-        $_SESSION['kysenum']--;}if($_SESSION['vastattu']>1){
-        $_SESSION['vastattu']--;};hae_kysymys(); break;
-      case "aloita":luotesti();break;
-      
-      case "vaihdatunus": vaihda_tunnus(); break;
-      case "haecat_pan": hae_kategoria_paneeli(); break;
-      case "bennys": muuta_demo(); break;
-      case "ses": ses_function(); break;
-      case "drag": drag_function(); break;
+        case "viimekys": 
+            tark_vast();if($_SESSION['kysenum']>1){
+            $_SESSION['kysenum']--;}if($_SESSION['vastattu']>1){
+            $_SESSION['vastattu']--;};hae_kysymys(); break;
+        case "aloita":luotesti();break;
+        case "vaihdatunus": vaihda_tunnus(); break;
+        case "haecat_pan": hae_kategoria_paneeli(); break;
+        case "bennys": muuta_demo(); break;
+        case "tallinna": muutakys(); break;
+        case "ses": ses_function(); break;
+        case "drag": drag_function(); break;
     }
   }
 }
@@ -33,6 +35,40 @@ if (is_ajax()) {
 //Function to check if the request is an AJAX request
 function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+}
+
+function muutakys(){
+    global $dbcon;
+    $return = $_POST;
+    
+    
+    $sql = 'UPDATE kysymys SET titleq="'.$return["titleq"].'" WHERE  id='.$return['id'];
+    if ($dbcon->query($sql) === TRUE) {
+} else {
+    $return['err']= "Error: " . $sql . $dbcon->error;
+}    
+
+    
+    for($i=1;$i<5;$i++){
+    $sql = 'UPDATE vastasukset SET ans="'.$return["answer".$i].'" WHERE  ansid='.$return['ansid'.$i];
+    if ($dbcon->query($sql) === TRUE) {
+        } else {
+            $return['err']= "Error: " . $sql . $dbcon->error;
+        }   
+    }
+    
+ $query = "SELECT * FROM kysymys where id='".$return['id']."'";
+ $result = $dbcon->query($query);
+    while($row = $result->fetch_array()){
+        
+    $return['r1']=$return['titleq'];
+    $return['r2']=$return['answer1'];
+    $return['r3']=$return['answer2'];
+    $return['r4']=$return['answer3'];
+    $return['r5']=$return['answer4'];
+    }
+    
+    echo html_entity_decode(json_encode($return));
 }
 
 function hae_kategoria_paneeli(){
@@ -47,6 +83,7 @@ function hae_kategoria_paneeli(){
     foreach($temparray as &$temp){
         for ($i=1;$i<5;$i++){
             $str = "answer".$i;
+            $temp['ansid'.$i]=$temp[$str];
             $query = "SELECT * FROM vastasukset where ansid='".$temp[$str]."'";
             $result2 = $dbcon->query($query);
             while($row = $result2->fetch_array()){
@@ -130,8 +167,8 @@ $_SESSION['testid']=$row['testid'];
          }    
          
          //jostain syystä utf8_encode palauttaa huonoja kirjaimia
-         //$return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
-         $return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
+         $return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+         //$return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
          
 echo html_entity_decode(json_encode($return));
          
