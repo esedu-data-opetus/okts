@@ -33,7 +33,7 @@ if(!isset($_SESSION)) {
             <button id="meemies">ALOITA TESTI</button>
         
         <div id="vastaus"></div>
-        <button id="cat-button">aloita</button><button id="joniboi">Vaihda tunnus</button><button id="sub-button">subscribe</button><button id="report-button">report</button>
+        <button id="cat-button">Aloita</button><button id="joniboi">Vaihda tunnus</button><button id="sub-button">Seuraava kysymys</button><button id="report-button">Edellinen kysymys</button>
         <div id="meemi"></div>
         </div>
     </body>
