@@ -72,9 +72,12 @@ border: 2px solid #3C763D;
     margin-left:200px;
     margin-right:200px;
     margin-top:0px;
-    height:700px;
+    height:auto;
     border-color: #3c763d;
     border-radius: 25px;
     background: white;
     
+}
+
+img{
 }
