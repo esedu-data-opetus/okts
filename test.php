@@ -13,14 +13,15 @@ if (is_ajax()) {
     
     switch($action) { //Switch case for value of action
         case "kategoriat": hae_kategoria();break;
-        case "seuraavakys": tark_vast();
+        case "seuraavakys": tall_vast();
             $_SESSION['kysenum']++;$_SESSION['vastattu']++;
             hae_kysymys(); break;
         case "ekakys" : $_SESSION['kysenum']++;hae_kysymys();break;
         case "viimekys": 
-            tark_vast();if($_SESSION['kysenum']>1){
-            $_SESSION['kysenum']--;}if($_SESSION['vastattu']>1){
-            $_SESSION['vastattu']--;};hae_kysymys(); break;
+            tall_vast();
+            if($_SESSION['kysenum']>1){$_SESSION['kysenum']--;}
+            if($_SESSION['vastattu']>1){$_SESSION['vastattu']--;}
+            hae_kysymys(); break;
         case "aloita":luotesti();break;
         case "vaihdatunus": vaihda_tunnus(); break;
         case "haecat_pan": hae_kategoria_paneeli(); break;
@@ -72,18 +73,24 @@ function muutakys(){
 }
 
 function hae_kategoria_paneeli(){
+    //hakee kysymyspaneeliin annetusta kategoriasta kaikki kysymykset
     global $dbcon;
     $return = $_POST;
     
+    //haetaan kysymykset arrayhyn
     $query = "select * from kysymys where category = ".$return['kategoria'];
     $result = $dbcon->query($query);
     while($row = $result->fetch_array()){
         $temparray[] = $row;
     }
+    
+    //koska kysymystietokannassa vastaukset ovat viittauksia toiseen tietokantaan
+    //pitää vastaukset hakea uudella kyselyllä jokaiselle kysymykselle.
     foreach($temparray as &$temp){
         for ($i=1;$i<5;$i++){
             $str = "answer".$i;
             $temp['ansid'.$i]=$temp[$str];
+            //pitää kysymyksen ID:n tallessa myöhempää muokkausta varten
             $query = "SELECT * FROM vastasukset where ansid='".$temp[$str]."'";
             $result2 = $dbcon->query($query);
             while($row = $result2->fetch_array()){
@@ -92,8 +99,8 @@ function hae_kategoria_paneeli(){
         }
     }
     
+    //palautetaan json selaimelle
     $return['catarray']=$temparray;
-   
     echo html_entity_decode(json_encode($return));
 }
 
@@ -126,80 +133,92 @@ function luotesti(){
     global $dbcon;
     $return = $_POST;
     $o = 0;
-    foreach($return['kategoria'] as $cat){
-        if (!isset($catname)){$catname ="";}
+    $temparray= array();
+    
+    if ($return['test_preset']!=0){
+        $query = "select * from testipohjat where pohjaid = ".$return['test_preset'];
+        $result = $dbcon->query($query);        
+        while($row = $result->fetch_array()) { 
+            for($i=1;$i<6;$i++){
+                $str = "cat".$i;
+                $temparray[]=$row[$str];
+            }
+        }
+    } else {
+        $temparray=$return['kategoria'];
+    }
+    
+    foreach($temparray as $cat){
+        if (!isset($catname)){
+            $catname ="";
+        }
         
         $query = "select * from kategoriat where catid = ".$cat;
-$result = $dbcon->query($query);
-while($row = $result->fetch_array())
-        {$catname= $row['catname'];}
-        
-    $query = "select * from kysymys where category = ".$cat." and demokys = 1 limit ".$_SESSION['kyspercat'];
-$result = $dbcon->query($query);
-$rows='';
-while($row = $result->fetch_array())
-{$rows[] = $row;}
-$i = 1; 
-    foreach($rows as $row)
-{$_SESSION['kysejar'][$o][$i] = $row['id'];$i++;}
-$_SESSION['kysejar'][$o][$i] = -1;$i++;
-$_SESSION['kysejar'][$o][$i] = $catname;
+        $result = $dbcon->query($query);        
+        while($row = $result->fetch_array()) {
+            $catname= $row['catname'];
+        }
 
-$o++;
-}
+        $query = "select * from kysymys where category = ".$cat." and demokys = 1 limit ".$_SESSION['kyspercat'];
+        $result = $dbcon->query($query);
+        $rows='';
+        while($row = $result->fetch_array()) {
+            $rows[] = $row;
+        }
+        
+        $i = 1; 
+        foreach($rows as $row) {
+            $_SESSION['kysejar'][$o][$i] = $row['id'];
+            $i++;
+        }
+        
+        $_SESSION['kysejar'][$o][$i] = -1;$i++;
+        $_SESSION['kysejar'][$o][$i] = $catname;
+        $o++;
+    }
 
     $_SESSION['kysejar'][] = -1;
     
-$temp_id = uniqid();
+    $temp_id = uniqid();
     $_SESSION['user'] = "guest".$temp_id;
-    $sql = "INSERT INTO `testit` (`usr`) VALUES ('".$_SESSION['user']."')";
+    $sql = "INSERT INTO `testit` (`usr`, `testipohja`) VALUES ('".$_SESSION['user']."','".$return['test_preset']."')";
     
-    
-    if ($dbcon->query($sql) === TRUE) {
-} else {
-    echo "Error: " . $sql . "<br>" . $dbcon->error;
-}$res = "SELECT * FROM testit where usr = '".$_SESSION['user']."'";
+    if ($dbcon->query($sql) === TRUE) {} 
+    else {
+        echo "Error: " . $sql . "<br>" . $dbcon->error;
+    }
+    $res = "SELECT * FROM testit where usr = '".$_SESSION['user']."'";
 
-      $result = mysqli_query($dbcon,$res) or die(mysqli_errno($dbcon));
-  		while($row = $result->fetch_assoc())
-         {
-$_SESSION['testid']=$row['testid'];
-         }    
+    $result = mysqli_query($dbcon,$res) or die(mysqli_errno($dbcon));
+    while($row = $result->fetch_assoc()) {
+        $_SESSION['testid']=$row['testid'];
+    }    
          
-         //jostain syystä utf8_encode palauttaa huonoja kirjaimia
-         $return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
-         //$return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
-         
-echo html_entity_decode(json_encode($return));
-         
+    //jostain syystä utf8_encode palauttaa huonoja kirjaimia
+    $return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
+    //$return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
+
+    echo html_entity_decode(json_encode($return));    
 }
 
-function tark_vast(){
-$return = $_POST;
-if ($return['value']!= null){
-global $dbcon;
-
-        $query = "SELECT *FROM kysymys where id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-      $result = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-  		while($row = $result->fetch_assoc())
-         {
-               $oikeavas = $row['oikeavastaus']; // TÄS PITÄÄ TIETÄÄ :D     
-         }
-                
+function tall_vast(){
+    $return = $_POST;
+    if ($return['value']!= null){
+        global $dbcon;
+            
         $sesos = "kys".$_SESSION['vastattu'];
         $soses = "ans".$_SESSION['vastattu'];
-if($return["value"]==$oikeavas)
-{    $_SESSION['pisteet']++;}
- 
-    $sql = "UPDATE testit SET ".$sesos." = ".$return["kysid"].", ".$soses." = ".$return["value"]." where testid = ".$_SESSION['testid'];
-    if ($dbcon->query($sql) === TRUE) {
-} else {
-    echo "Error: " . $sql . "<br>" . $dbcon->error;
-}    
+        //päivittää tietokantaan käyttäjän vastauksen
+        $sql = "UPDATE testit SET ".$sesos." = ".$return["kysid"].
+                ", ".$soses." = ".$return["value"].
+                " where testid = ".$_SESSION['testid'];
+        if ($dbcon->query($sql) === TRUE) {} else {
+            echo "Error: " . $sql . "<br>" . $dbcon->error;
+        }
+    }    
 
 }
-}
+
 
 
 
@@ -207,106 +226,110 @@ if($return["value"]==$oikeavas)
 function hae_kysymys(){
     $return = $_POST;
     global $dbcon;
-    //var_dump($_SESSION['kysejar']);
     $return['catval']="";
-$return["kysenum"]=$_SESSION['kysenum'];
-    if($_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']] > 0){
-      
-            $query = "SELECT * FROM kysymys kys JOIN vastasukset vas ON kys.answer1=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-      $result = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-  		while($row = $result->fetch_assoc())
-         {
-                    $return["q_id"]= $row['id'];
-//$return["ans1"]=utf8_encode($row['ans']);
-$return["ans1"]=$row['ans'];
-//$return["kysymys"]=utf8_encode($row['titleq']);
-$return["kysymys"]=$row['titleq'];
-$return["kuve"]=$row['image'];
-         }
-         
-        $query = "SELECT * FROM kysymys kys
-JOIN vastasukset vas ON kys.answer2=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-      $result2 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-  		while($row = $result2->fetch_assoc())
-         {
-                    //$return["ans2"]=utf8_encode($row['ans']);
-                    $return["ans2"]=$row['ans'];
-         
-         }
-                 $query = "SELECT * FROM kysymys kys
-JOIN vastasukset vas ON kys.answer3=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-      $result3 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-  		while($row = $result3->fetch_assoc())
-                  {
-                    //$return["ans3"]=utf8_encode($row['ans']);
-                    $return["ans3"]=$row['ans'];
-         
-         }
-                 $query = "SELECT * FROM kysymys kys
-JOIN vastasukset vas ON kys.answer4=vas.ansid and id = ".$_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-      $result4 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-  		while($row = $result4->fetch_assoc())
-                  {
-                    //$return["ans4"]=utf8_encode($row['ans']);
-                    $return["ans4"]=$row['ans'];
-         
-         }
-
-$sesos = "ans".$_SESSION['vastattu'];
-    $sql = "select * from testit where testid = ".$_SESSION['testid'];
-    $result = mysqli_query($dbcon,$sql) or die(mysqli_errno($dbcon));
-  		while($row = $result->fetch_assoc())
-         {$asd10="rad".$row[$sesos];
-         if($asd10!="rad0"){
-         $return['prevans']=$asd10;}}
-         
-         
-echo html_entity_decode(json_encode($return));
-return;
-    }
+    $return["kysenum"]=$_SESSION['kysenum'];
     
+    if($_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']] > 0){
+        //tarkistetaan että seuraava kysymys on kysymys ja
+        //haetaan kysymys tietokannasta
+        $query = "SELECT * FROM kysymys kys " .
+                 "JOIN vastasukset vas ON kys.answer1=vas.ansid and id = ".
+                 $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
+        $result = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
+        while($row = $result->fetch_assoc()) {
+            $return["q_id"]= $row['id'];
+            $return["ans1"]=$row['ans'];
+            $return["kysymys"]=$row['titleq'];
+            $return["kuve"]=$row['image'];
+        }
+        //haetaan kaikki vastaukset erikseen
+        //vois kai olla parempikin ratkaisu mut tää toimii
+        $query = "SELECT * FROM kysymys kys
+                 JOIN vastasukset vas ON kys.answer2=vas.ansid and id = ".
+                 $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
+
+        $result2 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
+        while($row = $result2->fetch_assoc()) {
+            $return["ans2"]=$row['ans'];
+        }
+        
+        $query = "SELECT * FROM kysymys kys
+                JOIN vastasukset vas ON kys.answer3=vas.ansid and id = ".
+                $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
+
+        $result3 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
+        while($row = $result3->fetch_assoc()) {
+            $return["ans3"]=$row['ans'];
+        }
+        
+        $query = "SELECT * FROM kysymys kys
+                JOIN vastasukset vas ON kys.answer4=vas.ansid and id = ".
+                $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
+
+        $result4 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
+        while($row = $result4->fetch_assoc()) {
+            $return["ans4"]=$row['ans'];
+        }
+        
+        //jos testissä mentiin taaksepäin, haetaan aiempi vastaus
+        $sesos = "ans".$_SESSION['vastattu'];
+        $sql = "select * from testit where testid = ".$_SESSION['testid'];
+        $result = mysqli_query($dbcon,$sql) or die(mysqli_errno($dbcon));
+        
+        while($row = $result->fetch_assoc()) {
+            $asd10="rad".$row[$sesos];
+            if($asd10!="rad0"){
+                $return['prevans']=$asd10;
+            }
+        }
+        
+        echo html_entity_decode(json_encode($return));
+        return;
+    }
+
     $_SESSION['catego']++;
     $_SESSION['kysenum']=0;
-    
-    
+
+
     if (!is_array($_SESSION['kysejar'][(int)$_SESSION['catego']])){
+        //jos kategoria ei ole array, on testissä päästy loppuun joten lasketaan pisteet
         $tempvar = $_SESSION['vastattu'] - 1;
         $tempvar2 = 1;
         $pistevar = 0;
+        //tallennetaan testin lopetusaika
         $sql = "UPDATE testit SET vastattu = '".$tempvar ."',finnish = now() where testid = ".$_SESSION['testid'];
         if ($dbcon->query($sql) === TRUE) {}
         for ($i = $tempvar; $i>0 ;$i--){
-        $sesos = "kys".$tempvar2;
-        $soses = "ans".$tempvar2;
-        $tempvar2++;
-        $sql = "SELECT * FROM testit tes
-        JOIN kysymys kys ON tes.".$sesos."=kys.id and tes.".$soses."=kys.oikeavastaus
-        where usr = '".$_SESSION['user']."';";
-         $result = mysqli_query($dbcon,$sql) or die(mysqli_errno($dbcon));
-          if(mysqli_num_rows($result) > 0){$pistevar++;}
-                }
-
-                $return["loppu"]="end";
-                $return['usr']=$_SESSION['user'];
-                $return["kysenum"]=$_SESSION['kysenum'];
-            $return["log2"]=$pistevar;
-            $_SESSION['pisteet']=$pistevar;
-            $sql = "update testit set aika = TIMESTAMPDIFF(second,testit.start,testit.finnish) where testit.testid = ".$_SESSION['testid'];
-    if ($dbcon->query($sql) === TRUE) {} 
-        } 
-        
-        else {$return['catval']="joo";
-        //$return['catname']=utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
-        $return['catname']=$_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
-        
+            $sesos = "kys".$tempvar2;
+            $soses = "ans".$tempvar2;
+            $tempvar2++;
+            
+            //tarkistetaan vastaukset testihistoriasta
+            $sql = "SELECT * FROM testit tes
+            JOIN kysymys kys ON tes.".$sesos."=kys.id and tes.".$soses."=kys.oikeavastaus
+            where usr = '".$_SESSION['user']."';";
+            
+            $result = mysqli_query($dbcon,$sql) or die(mysqli_errno($dbcon));
+            if(mysqli_num_rows($result) > 0){$pistevar++;}
         }
 
+        $return["loppu"]="end";
+        $return['usr']=$_SESSION['user'];
+        $return["kysenum"]=$_SESSION['kysenum'];
+        $return["log2"]=$pistevar;
+        //lasketaan ja tallennetaan testiin käytetty aika
+        $sql = "update testit set aika = TIMESTAMPDIFF(second,testit.start,testit.finnish) "
+                . "where testit.testid = ".$_SESSION['testid'];
+        if ($dbcon->query($sql) === TRUE) {} 
+    } 
+
+    else {$return['catval']="joo";
+    //näytetään seuraava kategoria
+        $return['catname']=$_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
+    }
+
 echo html_entity_decode(json_encode($return));
-  }
+}
 
   
   function vaihda_tunnus(){
