@@ -11,62 +11,91 @@ if (is_ajax()) {
   if (isset($_POST["action"]) && !empty($_POST["action"])) { //Checks if action value exists
     $action = $_POST["action"];
     
-    switch($action) { //Switch case for value of action
-        case "kategoriat": hae_kategoria();break;
-        case "seuraavakys": tall_vast();
-            $_SESSION['kysenum']++;$_SESSION['vastattu']++;
-            hae_kysymys(); break;
-        case "ekakys" : $_SESSION['kysenum']++;hae_kysymys();break;
-        case "viimekys": 
+    switch($action) { 
+        //Things I'm ready for:
+        //☐ Not Action
+        //☑ Action
+        
+        // kysely
+        case "kategoriat": // hakee kategoriat etusivulle
+            hae_kategoria();
+            break;                   
+        case "seuraavakys": // eteenpäin kyselyssä
+            tall_vast();                            
+            $_SESSION['kysenum']++;
+            $_SESSION['vastattu']++;         
+            hae_kysymys(); 
+            break;                               
+        case "ekakys" : // hakee kategorian ensimmäisen kysymyksen
+            $_SESSION['kysenum']++;
+            hae_kysymys();
+            break; 
+        case "viimekys": // taaksepäin kyselyssä
             tall_vast();
             if($_SESSION['kysenum']>1){$_SESSION['kysenum']--;}
             if($_SESSION['vastattu']>1){$_SESSION['vastattu']--;}
-            hae_kysymys(); break;
-        case "aloita":luotesti();break;
-        case "vaihdatunus": vaihda_tunnus(); break;
-        case "haecat_pan": hae_kategoria_paneeli(); break;
-        case "bennys": muuta_demo(); break;
-        case "tallinna": muutakys(); break;
-        case "ses": ses_function(); break;
-        case "drag": drag_function(); break;
+            hae_kysymys(); 
+            break;
+        case "aloita": // aloittaa testin
+            luotesti();
+            break;                             
+        case "vaihdatunus": // vaihtaa tunnuksen testin lopussa
+            vaihda_tunnus(); 
+            break;                 
+        
+        //kysymyspaneeli
+        case "haecat_pan": // hakee kysymyspaneeliin kysymykset valitun kategorian mukaan
+            hae_kategoria_paneeli(); 
+            break;          
+        case "bennys": // tallentaa kysymyksen demoon
+            muuta_demo(); 
+            break;                        
+        case "tallinna": // tallentaa muutoksen kysymykseen
+            muutakys(); 
+            break;                          
+        
+        //drag and drop Kappa
+        case "ses": ses_function(); break;                           
+        case "drag": drag_function(); break;                         
     }
   }
 }
 
-//Function to check if the request is an AJAX request
+//Function to check if the request is an AJAX request:D:D
 function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
 function muutakys(){
+    //tallentaa kysymyksen muutokset tietokantaan
     global $dbcon;
     $return = $_POST;
     
-    
+    //tallennetaan kysymys
     $sql = 'UPDATE kysymys SET titleq="'.$return["titleq"].'" WHERE  id='.$return['id'];
-    if ($dbcon->query($sql) === TRUE) {
-} else {
-    $return['err']= "Error: " . $sql . $dbcon->error;
-}    
-
+    if ($dbcon->query($sql) === TRUE) {} 
+    else {
+        $return['err']= "Error: " . $sql . $dbcon->error;
+    }    
     
+    //tallennetaan vastaukset
     for($i=1;$i<5;$i++){
-    $sql = 'UPDATE vastasukset SET ans="'.$return["answer".$i].'" WHERE  ansid='.$return['ansid'.$i];
-    if ($dbcon->query($sql) === TRUE) {
-        } else {
+        $sql = 'UPDATE vastasukset SET ans="'.$return["answer".$i].'" WHERE  ansid='.$return['ansid'.$i];
+        if ($dbcon->query($sql) === TRUE) {} 
+        else {
             $return['err']= "Error: " . $sql . $dbcon->error;
         }   
     }
     
- $query = "SELECT * FROM kysymys where id='".$return['id']."'";
- $result = $dbcon->query($query);
+    //haetaan kysymys uudestaan
+    $query = "SELECT * FROM kysymys where id='".$return['id']."'";
+    $result = $dbcon->query($query);
     while($row = $result->fetch_array()){
-        
-    $return['r1']=$return['titleq'];
-    $return['r2']=$return['answer1'];
-    $return['r3']=$return['answer2'];
-    $return['r4']=$return['answer3'];
-    $return['r5']=$return['answer4'];
+        $return['r1']=$return['titleq'];
+        $return['r2']=$return['answer1'];
+        $return['r3']=$return['answer2'];
+        $return['r4']=$return['answer3'];
+        $return['r5']=$return['answer4'];
     }
     
     echo html_entity_decode(json_encode($return));
@@ -105,25 +134,29 @@ function hae_kategoria_paneeli(){
 }
 
 function hae_kategoria(){
-    
+    //hakee kategoriat testin alkuun
     global $dbcon;
     $return = $_POST;
+    
+    // hakee kategoriat tietokannasta
     $query = "select * from kategoriat";
-    
     $result = $dbcon->query($query);
+    while($row = $result->fetch_array()){
+        $rows[] = $row;
+    }
     
-while($row = $result->fetch_array())
-{$rows[] = $row;}
-$i = 0;
-$temparray = array("id"=>array(),"name"=>array());
-  
-foreach($rows as $row)
+    //tekee arrayn kategorioiden ID:stä ja nimestä
+    $i = 0;
+    $temparray = array("id"=>array(),"name"=>array());
+    foreach($rows as $row){
+        $temparray['id'][$i]=$row['catid'];
+        $temparray['name'][$i]=$row['catname'];
+        $i++;
+    }
     
-{$temparray['id'][$i]=$row['catid'];$temparray['name'][$i]=$row['catname'];$i++;}
-//$temparray['name'] = array_map('utf8_encode',$temparray['name']);
-$return['catarray'] = $temparray;
-$return['catmaara'] = $i;
-echo html_entity_decode(json_encode($return));
+    $return['catarray'] = $temparray;
+    $return['catmaara'] = $i;
+    echo html_entity_decode(json_encode($return));
 
 }
 
@@ -134,8 +167,13 @@ function luotesti(){
     $return = $_POST;
     $o = 0;
     $temparray= array();
+    $testq = 0;
     
+    //tarkistaa käytetäänkö testipohjaa
     if ($return['test_preset']!=0){
+        //jos käytetään testipohjaa, haetaan testipohjan kategoriat
+        //ja käytetään demokysymyksiä
+        $testq = 1;
         $query = "select * from testipohjat where pohjaid = ".$return['test_preset'];
         $result = $dbcon->query($query);        
         while($row = $result->fetch_array()) { 
@@ -145,44 +183,54 @@ function luotesti(){
             }
         }
     } else {
+        //jos ei käytetä testipohjaa, otetaan käyttäjän valitsemat kategoriat
         $temparray=$return['kategoria'];
     }
     
+    //luodaan testi valittujen kategorioiden pohjalta
     foreach($temparray as $cat){
+        
         if (!isset($catname)){
             $catname ="";
         }
         
+        //hakee kategorian nimen väliruutuja varten
         $query = "select * from kategoriat where catid = ".$cat;
         $result = $dbcon->query($query);        
         while($row = $result->fetch_array()) {
             $catname= $row['catname'];
         }
-
-        $query = "select * from kysymys where category = ".$cat." and demokys = 1 limit ".$_SESSION['kyspercat'];
-        $result = $dbcon->query($query);
+        
+        //haetaan kysymykset tietokannasta
+        $query = "select * from kysymys where category = ".$cat." and demokys = ".$testq." order by rand() limit ".$_SESSION['kyspercat']."";
+        $result = $dbcon->query($query) or trigger_error($result->error."[$query]");
         $rows='';
         while($row = $result->fetch_array()) {
             $rows[] = $row;
         }
         
+        //tallennetaan kysymykset arrayhyn
         $i = 1; 
         foreach($rows as $row) {
             $_SESSION['kysejar'][$o][$i] = $row['id'];
             $i++;
         }
         
+        //lisätään viimeiseksi arvoksi -1 jotta kategorian lopun voi tarkistaa sillä, onko kysymyksen arvo yli 0
+        //-1 jälkeen lisätään kategorian nimi, jotta kategorian nimen voi hakea kysymysten määrällä per kategoria +2
         $_SESSION['kysejar'][$o][$i] = -1;$i++;
         $_SESSION['kysejar'][$o][$i] = $catname;
         $o++;
     }
 
+    //lisätään viimeikseksi kategoriaksi -1, jotta testin lopun voi tarkistaa sillä, onko kategorian arvo yli 0
     $_SESSION['kysejar'][] = -1;
     
+    //generoidaan satunnainen käyttäjänimi, jolla testi tallennetaan testihistoriaan, otetaan testin ID talteen
+    //tämän jälkeen satunnaisgeneroitua nimeä ei tarvita Kappa
     $temp_id = uniqid();
     $_SESSION['user'] = "guest".$temp_id;
     $sql = "INSERT INTO `testit` (`usr`, `testipohja`) VALUES ('".$_SESSION['user']."','".$return['test_preset']."')";
-    
     if ($dbcon->query($sql) === TRUE) {} 
     else {
         echo "Error: " . $sql . "<br>" . $dbcon->error;
@@ -194,14 +242,14 @@ function luotesti(){
         $_SESSION['testid']=$row['testid'];
     }    
          
-    //jostain syystä utf8_encode palauttaa huonoja kirjaimia
-    $return['catname']=  utf8_encode($_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2]);
-    //$return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
+    //haetaan kategorian nimi kysymysten määrällä per kategoria +2
+    $return['catname']=  $_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
 
     echo html_entity_decode(json_encode($return));    
 }
 
 function tall_vast(){
+    // tallentaa vastauksen testihistoriaan
     $return = $_POST;
     if ($return['value']!= null){
         global $dbcon;
@@ -218,10 +266,6 @@ function tall_vast(){
     }    
 
 }
-
-
-
-
 
 function hae_kysymys(){
     $return = $_POST;
@@ -242,35 +286,18 @@ function hae_kysymys(){
             $return["kysymys"]=$row['titleq'];
             $return["kuve"]=$row['image'];
         }
-        //haetaan kaikki vastaukset erikseen
-        //vois kai olla parempikin ratkaisu mut tää toimii
-        $query = "SELECT * FROM kysymys kys
-                 JOIN vastasukset vas ON kys.answer2=vas.ansid and id = ".
-                 $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
+        //haetaan kaikki vastaukset
+        for($i=2;$i<5;$i++){
+            $query = "SELECT * FROM kysymys kys
+                     JOIN vastasukset vas ON kys.answer".$i."=vas.ansid and id = ".
+                     $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
 
-        $result2 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-        while($row = $result2->fetch_assoc()) {
-            $return["ans2"]=$row['ans'];
+            $result2 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
+            while($row = $result2->fetch_assoc()) {
+                $str="ans".$i;
+                $return[$str]=$row["ans"];
+            }
         }
-        
-        $query = "SELECT * FROM kysymys kys
-                JOIN vastasukset vas ON kys.answer3=vas.ansid and id = ".
-                $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-        $result3 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-        while($row = $result3->fetch_assoc()) {
-            $return["ans3"]=$row['ans'];
-        }
-        
-        $query = "SELECT * FROM kysymys kys
-                JOIN vastasukset vas ON kys.answer4=vas.ansid and id = ".
-                $_SESSION['kysejar'][(int)$_SESSION['catego']][(int)$_SESSION['kysenum']];
-
-        $result4 = mysqli_query($dbcon,$query) or die(mysqli_errno($dbcon));
-        while($row = $result4->fetch_assoc()) {
-            $return["ans4"]=$row['ans'];
-        }
-        
         //jos testissä mentiin taaksepäin, haetaan aiempi vastaus
         $sesos = "ans".$_SESSION['vastattu'];
         $sql = "select * from testit where testid = ".$_SESSION['testid'];
@@ -286,7 +313,8 @@ function hae_kysymys(){
         echo html_entity_decode(json_encode($return));
         return;
     }
-
+    
+    //edetään kategoriassa koska seuraava kysymys on alle 0
     $_SESSION['catego']++;
     $_SESSION['kysenum']=0;
 
@@ -328,70 +356,73 @@ function hae_kysymys(){
         $return['catname']=$_SESSION['kysejar'][(int)$_SESSION['catego']][$_SESSION['kyspercat']+2];
     }
 
-echo html_entity_decode(json_encode($return));
+    echo html_entity_decode(json_encode($return));
 }
 
   
-  function vaihda_tunnus(){
-      global $dbcon;
-      $return = $_POST;
-       $sql = "UPDATE testit SET usr = '".$return['value']."' where testid = ".$_SESSION['testid'];
-    if ($dbcon->query($sql) === TRUE) {$return['usr']=$return['value'];$return['vaihto']=1;
-} else {
-    $return['error']='SQL-pyyntö epäonnistui';
-}    
-$return['loppu']='end';
-echo html_entity_decode(json_encode($return));
-  }
-  
-  
-  function muuta_demo(){
-      global $dbcon;
-      $return = $_POST;
-      
-      $sql = "UPDATE kysymys SET demokys = '".$return['value']."' where id ='".$return['id']."'";
-    if ($dbcon->query($sql) === TRUE) {$return['joo'] = 'Tietokanta päivitetty';
-} else {
-    $return['joo'] = "Error: " . $sql . "<br>" . $dbcon->error;
-}   
+    function vaihda_tunnus(){
+        global $dbcon;
+        $return = $_POST;
+        $sql = "UPDATE testit SET usr = '".$return['value']."' where testid = ".$_SESSION['testid'];
+        if ($dbcon->query($sql) === TRUE) {
+            $return['usr']=$return['value'];
+            $return['vaihto']=1;
+        } else {
+            $return['error']='SQL-pyyntö epäonnistui';
+        }    
+        $return['loppu']='end';
+        echo html_entity_decode(json_encode($return));
+    }
 
-echo html_entity_decode(json_encode($return));
-  }
+
+    function muuta_demo(){
+        global $dbcon;
+        $return = $_POST;
+
+        $sql = "UPDATE kysymys SET demokys = '".$return['value']."' where id ='".$return['id']."'";
+        if ($dbcon->query($sql) === TRUE) {
+            $return['joo'] = 'Tietokanta päivitetty';
+        } else {
+            $return['joo'] = "Error: " . $sql . "<br>" . $dbcon->error;
+        }   
+
+        echo html_entity_decode(json_encode($return));
+    }
   
   
   
 
 function drag_function(){
-$return = $_POST;
+    $return = $_POST;
 
-$oike1 = "drag4"; // TÄS PITÄÄ TIETÄÄ :D
-$oike2 = "drag5"; // TÄS PITÄÄ TIETÄÄ :D
-$oike3 = "drag6"; // TÄS PITÄÄ TIETÄÄ :D
-$oike4 = "drag1"; // TÄS PITÄÄ TIETÄÄ :D
+    $oike1 = "drag4"; // TÄS PITÄÄ TIETÄÄ :D
+    $oike2 = "drag5"; // TÄS PITÄÄ TIETÄÄ :D
+    $oike3 = "drag6"; // TÄS PITÄÄ TIETÄÄ :D
+    $oike4 = "drag1"; // TÄS PITÄÄ TIETÄÄ :D
 
-if($return["dz1"]==$oike1)
-{    $return["kys1"]='oekkee';    }
-else
-{ $return["kys1"]='viäri';}
+    if($return["dz1"]==$oike1)
+    {    $return["kys1"]='oekkee';    }
+    else
+    { $return["kys1"]='viäri';}
 
-if($return["dz2"]==$oike2)
-{    $return["kys2"]='oekkee';    }
-else
-{ $return["kys2"]='viäri';}
+    if($return["dz2"]==$oike2)
+    {    $return["kys2"]='oekkee';    }
+    else
+    { $return["kys2"]='viäri';}
 
-if($return["dz3"]==$oike3)
-{    $return["kys3"]='oekkee';    }
-else
-{ $return["kys3"]='viäri';}
+    if($return["dz3"]==$oike3)
+    {    $return["kys3"]='oekkee';    }
+    else
+    { $return["kys3"]='viäri';}
 
-if($return["dz4"]==$oike4)
-{    $return["kys4"]='oekkee';    }
-else
-{ $return["kys4"]='viäri';}
+    if($return["dz4"]==$oike4)
+    {    $return["kys4"]='oekkee';    }
+    else
+    { $return["kys4"]='viäri';}
 
 
- $return["json"] = json_encode($return);
- echo json_encode($return);
+    $return["json"] = json_encode($return);
+    echo json_encode($return);
 }
 
 function ses_function(){
@@ -407,6 +438,6 @@ function ses_function(){
     $return["kuve7"]="_ppmceow_400x400.jpeg";
     $return["kuve8"]="maxresdefault.jpg";
     
-echo html_entity_decode(json_encode($return));
+    echo html_entity_decode(json_encode($return));
 }
 ?>
