@@ -1,5 +1,5 @@
 ﻿<?php
-include './conn/dbconnect.php';  
+include '../conn/dbconnect.php';  
 
 
 $kysymys ="";

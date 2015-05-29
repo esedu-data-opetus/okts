@@ -1,5 +1,5 @@
 <?php
-    include ('./conn/dbconnect.php');
+    include ('../conn/dbconnect.php');
 ?>
 <link href="./kyspanel.css" rel="stylesheet" type="text/css"/>
 <script src="./jquery-2.1.3.min.js" type="text/javascript"></script>

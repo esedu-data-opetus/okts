@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-    var php_url = "./test.php";
+    var php_url = "../test.php";
     
     $('#alleycatblues').change(function() {
         
