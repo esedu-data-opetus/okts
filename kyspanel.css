@@ -1,45 +1,53 @@
-                        .table {
-			  	display: block;
-			}
-			.theading, .tableBody, .tableFoot, .row{
-			  	clear: both;
-			}
-			.thead, .tableFoot, .theaddemo{
-			  	background-color: #DDD;
-			  	font-weight: bold;
-                                text-align:center;
-			}
-			.cell, .celldemo, .thead, .theaddemo {
-                            border: 1px solid black;
-                            padding: 2px 2px 2px 2px;
-			  	float: left;
-			  	overflow: auto;
-			  	width: 12%;
-                                height:36px;
-                                
-			}
+.table {
+	display: block;
+}
+
+.theading, .tableBody, .tableFoot, .row{
+	clear: both;
+}
+			
+.thead, .tableFoot, .theaddemo, .tanshead{
+	background-color: #DDD;
+	font-weight: bold;
+    text-align:center;
+}
+
+.cell, .celldemo, .thead, .theaddemo, .anscell, .tanshead{
+    border: 1px solid black;
+    padding: 2px 2px 2px 2px;
+	float: left;
+	overflow: auto;
+	width: 12%;
+    height:36px;
+}
                         
-                        .theaddemo, .celldemo{
-                                width:3%;
-                        }
-                        .celldemo {
-                            padding: 12px 2px 12px 2px;
-                            text-align: center;
-                            height: 16;
-                            overflow: hidden;
-                          }
-			.table:after {
-			  	 visibility: hidden;
-			  	 display: block;
-			  	 font-size: 0;
-			  	 content: " ";
-			  	 clear: both;
-			  	 height: 0;
-			}
+.theaddemo, .celldemo{
+    width:3%;
+}
+
+.anscell, .tanshead{
+	width:7%;
+}
+
+.celldemo {
+    padding: 12px 2px 12px 2px;
+    ext-align: center;
+    height: 16;
+    overflow: hidden;
+}
+
+.table:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
                         
-                        #qweww, #ewqewq{
-                            min-height:20px;
-                            color:red;
-                            display:inline;
-                        }
+#qweww, #ewqewq{
+    min-height:20px;
+    color:red;
+    display:inline;
+}
                         

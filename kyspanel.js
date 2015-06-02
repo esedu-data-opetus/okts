@@ -1,6 +1,8 @@
 $( document ).ready(function() {
     var php_url = "./test.php";
-    
+    var muok_varasto = [];
+	
+	
     $('#alleycatblues').change(function() {
         
     if ($('#alleycatblues').val() !== ""){
@@ -26,8 +28,8 @@ $( document ).ready(function() {
                 array.push('<div class="thead">Vastaus 2</div>');
                 array.push('<div class="thead">Vastaus 3</div>');
                 array.push('<div class="thead">Vastaus 4</div>');
-                array.push('<div class="thead">Kuva</div>');
-                array.push('<div class="thead">Oikea vastaus</div>');
+                array.push('<div class="tanshead">Kuva</div>');
+                array.push('<div class="tanshead">Oikea vastaus</div>');
                 array.push('<div class="theaddemo">Demo</div>');
                 array.push('<div class="theaddemo">ID</div>');
                 array.push('</div>');
@@ -40,17 +42,18 @@ $( document ).ready(function() {
                         array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-ansid="'+item['ansid3']+'" data-kyspanel-id="answer3" class="cell">' + item['answer3'] + '</div>');
                         array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-ansid="'+item['ansid4']+'" data-kyspanel-id="answer4" class="cell">' + item['answer4'] + '</div>');
                         if(item['image']===""){ 
-                        array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="kuve" class="cell"></div>');
+                        array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="kuve" class="anscell"></div>');
                         } else{
-                        array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="kuve" class="cell"><a href="./img/' + item['image'] + '" >Link</a></div>');    
+                        array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="kuve" class="anscell"><a href="./img/' + item['image'] + '" >'+item['image']+'</a></div>');    
                         }
                         var tempstr = "answer"+item['oikeavastaus'];
-                        array.push('<div class="cell">' + item[tempstr] + '</div>');
+                        array.push('<div class="anscell" data-kyspanel-dindex="'+i+'" data-kyspanel-oikvas="'+item['oikeavastaus']+'" data-kyspanel-id="oikeavas">Vastaus ' + item['oikeavastaus'] + '</div>');
                         var tempstr = "kys"+item['id'];
                         array.push('<div class="celldemo"><input type="checkbox" class="dcb" id="'+tempstr+'" value="'+item['id']+'"/></div>');
                         array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="id" class="celldemo">'+item['id']+'</div>');
                         array.push('<button data-kyspanel-index="'+i+'" class="muok">Muokkaa kysymystä</button>');
                         array.push('<button style="visibility:hidden" data-kyspanel-index="'+i+'" class="tall">Tallenna kysymys</button>');
+                        array.push('<button style="visibility:hidden" data-kyspanel-index="'+i+'" class="peru">Peruuta</button>');
                         boxarray.push({
                                 id: tempstr,
                                 demo: item['demokys']
@@ -74,29 +77,60 @@ $( document ).ready(function() {
     });
     
     $('body').on('click', '.muok', function(){
-        console.log($(this).data("kyspanel-index"));
+		var k_id=$(this).data("kyspanel-index");
         $('.muok').css('visibility','hidden');
         $(this).hide();
         $(this).css('visibility','hidden');
-        $(".tall[data-kyspanel-index='"+$(this).data("kyspanel-index")+"']").css('visibility','visible');
+        $(".tall[data-kyspanel-index='"+k_id+"']").css('visibility','visible');
+        $(".peru[data-kyspanel-index='"+k_id+"']").css('visibility','visible');
+		
         var asd= [];
-        
-        $.each($("div[data-kyspanel-dindex='"+$(this).data("kyspanel-index")+"']"), function(index, value){
+		
+        $.each($("div[data-kyspanel-dindex='"+k_id+"']"), function(index, value){
             asd.push(value);
         });
-        
-        $("div[data-kyspanel-dindex='"+$(this).data("kyspanel-index")+"'][data-kyspanel-id='titleq']").html('<textarea rows="13" cols="20" id="titleq" type="textbox" >'+asd[0]["outerText"]+'</textarea>');
-        $("div[data-kyspanel-dindex='"+$(this).data("kyspanel-index")+"'][data-kyspanel-id='titleq']").css('height','200');
+		
+        for(var i = 0;i<5;i++){
+			muok_varasto.push(asd[i]['outerText']);
+		}
+		muok_varasto.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='oikeavas']").data('kyspanel-oikvas'));
+		console.log(muok_varasto);
+		
+		muok_varasto.push($('div[data-kyspanel-dindex="'+k_id+'"][data-kyspanel-id="kuve"]')[0]['outerText']);
+		
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html(
+			'Uusi kuva:<br>'+
+			'<form data-kyspanel-index="'+k_id+'" method="post" id="fileinfo" name="fileinfo">'+
+			'<input type="file" name="file" required />'+
+			'<input type="submit" value="Tallenna tiedosto" /></form>'+
+			'<button data-kyspanel-index="'+k_id+'" id="poista">Poista kuva</button>');
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','150');
+		
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='oikeavas']").html(
+		'<input id="oikeavas1" type="radio" name="oikeavas" value="1">1'+
+		'<input id="oikeavas2" type="radio" name="oikeavas" value="2">2'+
+		'<input id="oikeavas3" type="radio" name="oikeavas" value="3">3'+
+		'<input id="oikeavas4" type="radio" name="oikeavas" value="4">4'
+		);
+		
+		$('#oikeavas'+muok_varasto[5]).prop("checked", true);  
+		
+        $("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='titleq']").html('<textarea rows="13" cols="20" id="titleq" type="textbox" >'+asd[0]["outerText"]+'</textarea>');
+        $("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='titleq']").css('height','200');
         for(var i = 1;i<5;i++){
-            $("div[data-kyspanel-dindex='"+$(this).data("kyspanel-index")+"'][data-kyspanel-id='answer"+i+"']").html('<textarea rows="13" cols="20" id="answer'+i+'" type="textbox" >'+asd[i]["outerText"]+'</textarea>');
-            $("div[data-kyspanel-dindex='"+$(this).data("kyspanel-index")+"'][data-kyspanel-id='answer"+i+"']").css('height','200');
+            $("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer"+i+"']").html('<textarea rows="13" cols="20" id="answer'+i+'" type="textbox" >'+asd[i]["outerText"]+'</textarea>');
+            $("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer"+i+"']").css('height','200');
         }
+		
+		
     });
     
     $('body').on('click', '.tall', function(){
         $(this).css('visibility','hidden');
         $('.muok').css('visibility','visible');
         $('.muok').show();
+		$('.peru').css('visibility','hidden');
+		muok_varasto = [];
         var k_id=$(this).data("kyspanel-index");
         var asn1par=$("#answer1").parent();
         var asn2par=$("#answer2").parent();
@@ -105,6 +139,7 @@ $( document ).ready(function() {
         var data={
             action:'tallinna',
             titleq:$("#titleq").val(),
+            oikeavas:$('input:radio[name=oikeavas]:checked').val(),
             ansid1:asn1par.data('kyspanel-ansid'),
             ansid2:asn2par.data('kyspanel-ansid'),
             ansid3:asn3par.data('kyspanel-ansid'),
@@ -116,6 +151,7 @@ $( document ).ready(function() {
             id:$('div[data-kyspanel-dindex="'+k_id+'"][data-kyspanel-id="id"]')[0]['outerText']
         };
         data = $(this).serialize() + "&" + $.param(data);
+		
         
         $.ajax({
             method: "POST",
@@ -136,10 +172,52 @@ $( document ).ready(function() {
                    value.css('height','36');
                    i++;
                 });
+				
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='oikeavas']").html('Vastaus '+data['r6']);
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='oikeavas']").data('kyspanel-oikvas',data['r6']);
+				
+				if(data['r7']!==''){ 
+					$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('<a href="./img/' + data['r7'] + '" >'+data['r7']+'</a>');
+				} else{
+					$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('');    
+				}
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
             }
         });
     });
     
+	$('body').on('click', '.peru', function(){
+		//peruuta :D
+		var k_id=$(this).data("kyspanel-index");
+		$(this).css('visibility','hidden');
+        $('.muok').css('visibility','visible');
+        $('.muok').show();
+		$(".tall[data-kyspanel-index='"+k_id+"']").css('visibility','hidden');
+		
+		var asd = [];
+        asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='titleq']"));
+        asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer1']"));
+        asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer2']"));
+        asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer3']"));
+        asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='answer4']"));
+        var i=0;
+        $.each(asd, function(index,value){
+			value.html(muok_varasto[i]);
+			value.css('height','36');
+			i++;
+        });
+		
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='oikeavas']").html('Vastaus '+muok_varasto[5]);
+		
+		console.log(muok_varasto[6]);
+			if(typeof(muok_varasto[6])!=="undefined"){ 
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('<a href="./img/' + muok_varasto[6] + '" >'+muok_varasto[6]+'</a>');
+			} 
+			
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+		muok_varasto = [];
+	});
+	
     $('body').on('change', '.dcb', function(){
          var temp=0;
         if (this.checked)
@@ -178,7 +256,76 @@ $( document ).ready(function() {
                 });
             }});
     });
+	
+	$('body').on('click', '#poista', function(){
+		var k_id=$(this).data("kyspanel-index");
+		console.log(k_id);
+		var data = {
+			action:"poistakuva",
+			id:$('div[data-kyspanel-dindex="'+k_id+'"][data-kyspanel-id="id"]')[0]['outerText'],
+			name:muok_varasto[6]
+		} 
+		$.ajax({
+			method: "POST",
+			dataType: "json",
+			data: data,
+			url: php_url,
+			cache: false,
+			success:function( data ) {
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('');
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+				muok_varasto.splice(6,1);
+			}
+		});
+	});
     
+	$('body').on('submit', '#fileinfo', function(e) {
+		var k_id=$(this).data("kyspanel-index");
+		e.preventDefault();
+		e.stopPropagation(); 
+		console.log("submit event");
+		var fd = new FormData(this);
+		$.ajax({
+			url: "./upload.php",
+			type: "POST",
+			data: fd,
+			enctype: 'multipart/form-data',
+			processData: false,  // tell jQuery not to process the data
+			contentType: false,   // tell jQuery not to set contentType
+			success:function( data ) {
+				data = JSON.parse(data);
+				console.log(data);
+				if (typeof(data['err'])!=="undefined"){
+					$('#fileinfo').flash_message({
+						text: data['err'],
+						how: 'append'
+					});
+				}
+				if (data['success']==="success"){
+					var data2 = {
+						action:'tallkuva',
+						name:data['fname'],
+						id:$('div[data-kyspanel-dindex="'+k_id+'"][data-kyspanel-id="id"]')[0]['outerText'],
+						van_kuv:muok_varasto[6]
+					};
+					$.ajax({
+						method: "POST",
+						dataType: "json",
+						data: data2,
+						url: php_url,
+						cache: false,
+						success:function( idata ) {
+							$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('<a href="./img/' + idata['name'] + '" >'+idata['name']+'</a>');
+							$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+							muok_varasto.splice(6,1);
+					}});
+				}
+				
+			}
+		});
+	});
+	
+	
 (function($) {
     $.fn.flash_message = function(options) {
       

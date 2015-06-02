@@ -52,7 +52,13 @@ if (is_ajax()) {
             break;                        
         case "tallinna": // tallentaa muutoksen kysymykseen
             muutakys(); 
-            break;                          
+            break;              
+		case "tallkuva": //tallentaa kuvan kysymyspaneelista
+			tallkuva();
+			break;
+		case "poistakuva": //poistaa kuvan kysymyksestä
+			poistakuva();
+			break;
         
         //drag and drop Kappa
         case "ses": ses_function(); break;                           
@@ -66,13 +72,57 @@ function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
+function poistakuva(){
+	global $dbcon;
+	$return = $_POST;
+	
+	//poistaa kuvan tietokannasta
+	$sql = 'UPDATE kysymys SET image = "" WHERE  id='.$return['id'];
+    if ($dbcon->query($sql) === TRUE) {} 
+    else {
+        $return['err']= "Error: " . $sql . $dbcon->error;
+    }
+	
+	//poistaa kuvan palvelimelta
+	if (!empty($return['name'])){
+		if (file_exists("img/" . $return['name'])) {
+			unlink("./img/".$return['name']);
+		}
+	}
+	
+	echo html_entity_decode(json_encode($return));
+}
+
+function tallkuva(){
+	//tallentaa uuden kuvan tietokantaan
+	
+	global $dbcon;
+    $return = $_POST;
+	
+	//korvaa kuvan tietokannassa
+	$sql = 'UPDATE kysymys SET image = "'.$return['name'].'" WHERE  id='.$return['id'];
+    if ($dbcon->query($sql) === TRUE) {} 
+    else {
+        $return['err']= "Error: " . $sql . $dbcon->error;
+    }    
+	
+	//poistaa vanhan kuvan palvelimelta
+	if (!empty($return['van_kuv'])){
+		if (file_exists("img/" . $return['van_kuv'])) {
+			unlink("./img/".$return['van_kuv']);
+		}
+	}
+	
+	echo html_entity_decode(json_encode($return));
+}
+
 function muutakys(){
     //tallentaa kysymyksen muutokset tietokantaan
     global $dbcon;
     $return = $_POST;
     
     //tallennetaan kysymys
-    $sql = 'UPDATE kysymys SET titleq="'.$return["titleq"].'" WHERE  id='.$return['id'];
+    $sql = 'UPDATE kysymys SET titleq="'.$return["titleq"].'", oikeavastaus="'.$return['oikeavas'].'" WHERE  id='.$return['id'];
     if ($dbcon->query($sql) === TRUE) {} 
     else {
         $return['err']= "Error: " . $sql . $dbcon->error;
@@ -91,12 +141,20 @@ function muutakys(){
     $query = "SELECT * FROM kysymys where id='".$return['id']."'";
     $result = $dbcon->query($query);
     while($row = $result->fetch_array()){
-        $return['r1']=$return['titleq'];
-        $return['r2']=$return['answer1'];
-        $return['r3']=$return['answer2'];
-        $return['r4']=$return['answer3'];
-        $return['r5']=$return['answer4'];
-    }
+        $return['r1']=$row['titleq'];
+		$return['r6']=$row['oikeavastaus'];
+		$return['r7']=$row['image'];
+    }    
+	
+	//haetaan vastaukset uudestaan
+	for($i=1;$i<5;$i++){
+		$o=$i+1;
+		$query = "SELECT * FROM vastasukset where ansid='".$return['ansid'.$i]."'";
+		$result = $dbcon->query($query);
+		while($row = $result->fetch_array()){
+			$return['r'.$o]=$row['ans'];
+		}
+	}
     
     echo html_entity_decode(json_encode($return));
 }
