@@ -18,7 +18,7 @@
 	float: left;
 	overflow: auto;
 	width: 12%;
-    height:36px;
+    height:40px;
 }
                         
 .theaddemo, .celldemo{
@@ -31,9 +31,9 @@
 
 .celldemo {
     padding: 12px 2px 12px 2px;
-    ext-align: center;
-    height: 16;
+    text-align: center;
     overflow: hidden;
+    height:20px;
 }
 
 .table:after {

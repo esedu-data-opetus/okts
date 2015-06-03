@@ -49,11 +49,14 @@ $( document ).ready(function() {
                         var tempstr = "answer"+item['oikeavastaus'];
                         array.push('<div class="anscell" data-kyspanel-dindex="'+i+'" data-kyspanel-oikvas="'+item['oikeavastaus']+'" data-kyspanel-id="oikeavas">Vastaus ' + item['oikeavastaus'] + '</div>');
                         var tempstr = "kys"+item['id'];
-                        array.push('<div class="celldemo"><input type="checkbox" class="dcb" id="'+tempstr+'" value="'+item['id']+'"/></div>');
+                        array.push('<div data-kyspanel-dindex="'+i+'" class="celldemo"><input type="checkbox" class="dcb" id="'+tempstr+'" value="'+item['id']+'"/></div>');
                         array.push('<div data-kyspanel-dindex="'+i+'" data-kyspanel-id="id" class="celldemo">'+item['id']+'</div>');
+						array.push('<div data-kyspanel-dindex="'+i+'" id="but'+i+'">')
                         array.push('<button data-kyspanel-index="'+i+'" class="muok">Muokkaa kysymystä</button>');
-                        array.push('<button style="visibility:hidden" data-kyspanel-index="'+i+'" class="tall">Tallenna kysymys</button>');
-                        array.push('<button style="visibility:hidden" data-kyspanel-index="'+i+'" class="peru">Peruuta</button>');
+                        array.push('<button data-kyspanel-index="'+i+'" class="vaihcat">Vaihda kysymyksen kategoria</button>');
+                        array.push('<button style="display:none" data-kyspanel-index="'+i+'" class="tall">Tallenna kysymys</button>');
+                        array.push('<button style="display:none" data-kyspanel-index="'+i+'" class="peru">Peruuta</button>');
+						array.push('</div>')
                         boxarray.push({
                                 id: tempstr,
                                 demo: item['demokys']
@@ -78,11 +81,11 @@ $( document ).ready(function() {
     
     $('body').on('click', '.muok', function(){
 		var k_id=$(this).data("kyspanel-index");
-        $('.muok').css('visibility','hidden');
+        $('.muok').hide();
+        $('.vaihcat').hide();
         $(this).hide();
-        $(this).css('visibility','hidden');
-        $(".tall[data-kyspanel-index='"+k_id+"']").css('visibility','visible');
-        $(".peru[data-kyspanel-index='"+k_id+"']").css('visibility','visible');
+        $(".tall[data-kyspanel-index='"+k_id+"']").show();
+        $(".peru[data-kyspanel-index='"+k_id+"']").show();
 		
         var asd= [];
 		
@@ -126,10 +129,10 @@ $( document ).ready(function() {
     });
     
     $('body').on('click', '.tall', function(){
-        $(this).css('visibility','hidden');
-        $('.muok').css('visibility','visible');
+        $(this).hide();
         $('.muok').show();
-		$('.peru').css('visibility','hidden');
+        $('.vaihcat').show();
+		$('.peru').hide();
 		muok_varasto = [];
         var k_id=$(this).data("kyspanel-index");
         var asn1par=$("#answer1").parent();
@@ -169,7 +172,7 @@ $( document ).ready(function() {
                 var i=1;
                 $.each(asd, function(index,value){
                    value.html(data["r"+i]);
-                   value.css('height','36');
+                   value.css('height','40');
                    i++;
                 });
 				
@@ -181,7 +184,7 @@ $( document ).ready(function() {
 				} else{
 					$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('');    
 				}
-				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','40');
             }
         });
     });
@@ -189,10 +192,10 @@ $( document ).ready(function() {
 	$('body').on('click', '.peru', function(){
 		//peruuta :D
 		var k_id=$(this).data("kyspanel-index");
-		$(this).css('visibility','hidden');
-        $('.muok').css('visibility','visible');
+		$(this).hide();
         $('.muok').show();
-		$(".tall[data-kyspanel-index='"+k_id+"']").css('visibility','hidden');
+		$('.vaihcat').show();
+		$(".tall[data-kyspanel-index='"+k_id+"']").hide();
 		
 		var asd = [];
         asd.push($("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='titleq']"));
@@ -203,7 +206,7 @@ $( document ).ready(function() {
         var i=0;
         $.each(asd, function(index,value){
 			value.html(muok_varasto[i]);
-			value.css('height','36');
+			value.css('height','40');
 			i++;
         });
 		
@@ -214,7 +217,7 @@ $( document ).ready(function() {
 				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('<a href="./img/' + muok_varasto[6] + '" >'+muok_varasto[6]+'</a>');
 			} 
 			
-		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+		$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','40');
 		muok_varasto = [];
 	});
 	
@@ -257,6 +260,62 @@ $( document ).ready(function() {
             }});
     });
 	
+	$('body').on('click', '.vaihcat', function(){
+		var k_id=$(this).data("kyspanel-index");
+		$('.vaihcat').hide();
+		$('.muok').hide();
+		
+		$.ajax({
+			method: "POST",
+			dataType: "json",
+			data: {action:"kategoriat"},
+			url: php_url,
+			cache: false,
+			success:function( data ) {
+				var array = [];
+				array.push('<select id="select'+k_id+'" class="select" name="kategoria">');
+				for(var i = 0; i<data['catmaara'];i++){
+					array.push('<option value="'+data['catarray']['id'][i]+'">'+data['catarray']['name'][i]+'</option>');
+				};
+				array.push('</select>');
+				array.push('<button class="select" data-kyspanel-index="'+k_id+'" id="vaihdacat">Vaihda kategoria</button>');
+				$('#but'+k_id).append(array.join(''));
+			}
+		});
+		
+		
+	});
+	
+	$('body').on('click', '#vaihdacat', function(){
+		var k_id=$(this).data("kyspanel-index");
+		$('.vaihcat').show();
+		$('.muok').show();
+		
+		var cat= $('#select'+k_id).val();
+		var vancat = $('#alleycatblues').val();
+		$('.select').remove();
+		
+		if(cat!==vancat){
+			$.ajax({
+				method: "POST",
+				dataType: "json",
+				data: {
+					action:"vaihcat",
+					id:$('div[data-kyspanel-dindex="'+k_id+'"][data-kyspanel-id="id"]')[0]['outerText'],
+					cat:cat
+					},
+				url: php_url,
+				cache: false,
+				success:function( data ) {
+					if (typeof(data['err'])==="undefined"){
+						$("div[data-kyspanel-dindex='"+k_id+"']").remove();
+					}
+				}
+			});
+		};
+	});
+	
+	
 	$('body').on('click', '#poista', function(){
 		var k_id=$(this).data("kyspanel-index");
 		console.log(k_id);
@@ -273,7 +332,7 @@ $( document ).ready(function() {
 			cache: false,
 			success:function( data ) {
 				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('');
-				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+				$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','40');
 				muok_varasto.splice(6,1);
 			}
 		});
@@ -316,7 +375,7 @@ $( document ).ready(function() {
 						cache: false,
 						success:function( idata ) {
 							$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").html('<a href="./img/' + idata['name'] + '" >'+idata['name']+'</a>');
-							$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','36');
+							$("div[data-kyspanel-dindex='"+k_id+"'][data-kyspanel-id='kuve']").css('height','40');
 							muok_varasto.splice(6,1);
 					}});
 				}

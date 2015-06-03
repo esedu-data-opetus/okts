@@ -59,6 +59,9 @@ if (is_ajax()) {
 		case "poistakuva": //poistaa kuvan kysymyksestä
 			poistakuva();
 			break;
+		case "vaihcat": //vaihtaa kysymyspaneelin kysymyksen kategorian
+			vaihdacat();
+			break;
         
         //drag and drop Kappa
         case "ses": ses_function(); break;                           
@@ -72,7 +75,23 @@ function is_ajax() {
   return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
+function vaihdacat(){
+	// vaihtaa kysymyksen kategorian
+	global $dbcon;
+	$return = $_POST;
+	
+	$sql = 'UPDATE kysymys SET category = '.$return['cat'].' WHERE  id='.$return['id'];
+    if ($dbcon->query($sql) === TRUE) {} 
+    else {
+        $return['err']= "Error: " . $sql . $dbcon->error;
+    }
+	
+	echo html_entity_decode(json_encode($return));
+}
+
 function poistakuva(){
+	// poistaa kuvan tietokannasta ja palvelimelta
+	
 	global $dbcon;
 	$return = $_POST;
 	
