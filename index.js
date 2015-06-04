@@ -8,9 +8,10 @@ $( document ).ready(function() {
     $('#report-button').hide();
     $('#joniboi').hide();
     $('#cat-button').hide();
+    $('#meemies').hide();
     var tempvar = {"action": "kategoriat"};
     tempvar = $(this).serialize() + "&" + $.param(tempvar);
-    
+    /*
     $.ajax({
         method: "POST",
         dataType: "json",
@@ -28,8 +29,7 @@ $( document ).ready(function() {
             $('#vastaus').prepend('<span class="err">Valitse kategoriat</span>');
         }
     });
-
-
+	*/
     var data= "";
     var kysid;
     
@@ -144,10 +144,20 @@ $( document ).ready(function() {
             success:function( data ) {
                 if(data['loppu']==="end"){
                     if(data['vaihto']===1){
-                    $('#vastaus').html('Tunnus vaihdettu onnistuneesti, testi tallennettu tunnuksella '+data['usr']+'<br>');
+						$('#vastaus').html('Tunnus vaihdettu onnistuneesti, testi tallennettu tunnuksella '+data['usr']+'<br>');
                     }
                     else {
-                        $('#vastaus').html('Testi loppui, sait '+data['log2']+' pistettä, testi tallenettu vierastunnuksella '+data['usr']+'<br>');
+						console.log(data['catpisteet'])
+						var array = [];
+                        array.push('Testi loppui, sait '+data['log2']+' pistettä,');
+						array.push('testi tallenettu vierastunnuksella '+data['usr']+'<br>');
+						var min = data['aika']/60;
+						var sek = data['aika']%60;
+						array.push('Käytit testiin aikaa '+Math.floor(min)+' minuuttia ja '+sek+' sekuntia<br>');
+						$.each(data['catpisteet'], function(index,value){
+							array.push('Sait '+value+' pistettä kategoriasta '+data['catnimet'][index]+'<br>');
+						});
+						$('#vastaus').html(array.join(''));
                     }
 
                     $('#vastaus').append('<input id="nick" type="text" />');

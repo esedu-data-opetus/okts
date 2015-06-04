@@ -263,6 +263,7 @@ function luotesti(){
         //jos ei käytetä testipohjaa, otetaan käyttäjän valitsemat kategoriat
         $temparray=$return['kategoria'];
     }
+	$_SESSION['cat_varasto'] = $temparray;
     
     //luodaan testi valittujen kategorioiden pohjalta
     foreach($temparray as $cat){
@@ -277,15 +278,15 @@ function luotesti(){
         while($row = $result->fetch_array()) {
             $catname= $row['catname'];
         }
-        
+		
         //haetaan kysymykset tietokannasta
         $query = "select * from kysymys where category = ".$cat." and demokys = ".$testq." order by rand() limit ".$_SESSION['kyspercat']."";
         $result = $dbcon->query($query) or trigger_error($result->error."[$query]");
-        $rows='';
+		$rows='';
         while($row = $result->fetch_array()) {
             $rows[] = $row;
         }
-        
+		
         //tallennetaan kysymykset arrayhyn
         $i = 1; 
         foreach($rows as $row) {
@@ -297,9 +298,10 @@ function luotesti(){
         //-1 jälkeen lisätään kategorian nimi, jotta kategorian nimen voi hakea kysymysten määrällä per kategoria +2
         $_SESSION['kysejar'][$o][$i] = -1;$i++;
         $_SESSION['kysejar'][$o][$i] = $catname;
+		
         $o++;
     }
-
+	
     //lisätään viimeikseksi kategoriaksi -1, jotta testin lopun voi tarkistaa sillä, onko kategorian arvo yli 0
     $_SESSION['kysejar'][] = -1;
     
@@ -397,35 +399,71 @@ function hae_kysymys(){
 
 
     if (!is_array($_SESSION['kysejar'][(int)$_SESSION['catego']])){
-        //jos kategoria ei ole array, on testissä päästy loppuun joten lasketaan pisteet
+		
         $tempvar = $_SESSION['vastattu'] - 1;
-        $tempvar2 = 1;
-        $pistevar = 0;
+		
+		//jos kategoria ei ole array, on testissä päästy loppuun joten lasketaan pisteet
         //tallennetaan testin lopetusaika
         $sql = "UPDATE testit SET vastattu = '".$tempvar ."',finnish = now() where testid = ".$_SESSION['testid'];
-        if ($dbcon->query($sql) === TRUE) {}
-        for ($i = $tempvar; $i>0 ;$i--){
-            $sesos = "kys".$tempvar2;
-            $soses = "ans".$tempvar2;
-            $tempvar2++;
-            
-            //tarkistetaan vastaukset testihistoriasta
-            $sql = "SELECT * FROM testit tes
-            JOIN kysymys kys ON tes.".$sesos."=kys.id and tes.".$soses."=kys.oikeavastaus
-            where usr = '".$_SESSION['user']."';";
-            
-            $result = mysqli_query($dbcon,$sql) or die(mysqli_errno($dbcon));
-            if(mysqli_num_rows($result) > 0){$pistevar++;}
-        }
-
+		if ($dbcon->query($sql) === TRUE) {}
+		
+		
+        $pistevar = 0;
+		$catpisteet = array_fill(0,count($_SESSION['cat_varasto']),0);
+        
+		//lasketaan pisteet kategorioittain
+        for ($o = 0; $o<count($_SESSION['cat_varasto']) ;$o++){
+			$tempvar2 = 1;
+			for ($i = $tempvar; $i>0 ;$i--){
+				$sesos = "kys".$tempvar2;
+				$soses = "ans".$tempvar2;
+				$tempvar2++;
+				
+				//tarkistetaan vastaukset testihistoriasta
+				$sql = "SELECT * FROM testit tes
+				JOIN kysymys kys ON tes.".$sesos."=kys.id and tes.".$soses."=kys.oikeavastaus and kys.category=".$_SESSION['cat_varasto'][$o].
+				" where testid = ".$_SESSION['testid'];
+				$result = mysqli_query($dbcon,$sql) or trigger_error($dbcon->error."[$sql]");    
+				if(mysqli_num_rows($result) > 0){$catpisteet[$o]++;}
+			}
+		}
+		
+		foreach($_SESSION['cat_varasto'] as &$cat){
+			$query = "select * from kategoriat where catid = ".$cat;
+			$result = $dbcon->query($query) or trigger_error($dbcon->error."[$query]");      
+			while($row = $result->fetch_array()) {
+				$cat= $row['catname'];
+			}
+		}
+		
+		//listätään pisteet yhteen 
+		foreach($catpisteet as $hv){
+			$pistevar+=$hv;
+		}
+		
+		//tallennetaan testistä saadut pisteet
+		$sql = "update testit set pisteet = ".$pistevar
+                . "where testit.testid = ".$_SESSION['testid'];
+		
         $return["loppu"]="end";
         $return['usr']=$_SESSION['user'];
         $return["kysenum"]=$_SESSION['kysenum'];
         $return["log2"]=$pistevar;
+        $return["catpisteet"]=$catpisteet;
+        $return["catnimet"]=$_SESSION['cat_varasto'];
+		
         //lasketaan ja tallennetaan testiin käytetty aika
         $sql = "update testit set aika = TIMESTAMPDIFF(second,testit.start,testit.finnish) "
                 . "where testit.testid = ".$_SESSION['testid'];
-        if ($dbcon->query($sql) === TRUE) {} 
+		if ($dbcon->query($sql) === TRUE) {} 
+		
+		//haetaan tallennettu aika 
+		$query = "select * from testit where testit.testid = ".$_SESSION['testid'];
+        $result = $dbcon->query($query) or trigger_error($result->error."[$query]");
+        while($row = $result->fetch_array()) {
+            $return['aika']= $row['aika'];
+        }
+        
     } 
 
     else {$return['catval']="joo";
@@ -437,34 +475,40 @@ function hae_kysymys(){
 }
 
   
-    function vaihda_tunnus(){
-        global $dbcon;
-        $return = $_POST;
-        $sql = "UPDATE testit SET usr = '".$return['value']."' where testid = ".$_SESSION['testid'];
-        if ($dbcon->query($sql) === TRUE) {
-            $return['usr']=$return['value'];
-            $return['vaihto']=1;
-        } else {
-            $return['error']='SQL-pyyntö epäonnistui';
-        }    
-        $return['loppu']='end';
-        echo html_entity_decode(json_encode($return));
-    }
+function vaihda_tunnus(){
+	// vaihtaa käyttäjän tunnuksen testin lopussa
+	global $dbcon;
+	$return = $_POST;
+	
+
+	$sql = "UPDATE testit SET usr = '".$return['value']."' where testid = ".$_SESSION['testid'];
+	if ($dbcon->query($sql) === TRUE) {
+		$return['usr']=$return['value'];
+		$return['vaihto']=1;
+	} else {
+		$return['error']='SQL-pyyntö epäonnistui';
+	}    
+	
+	$return['loppu']='end';
+	echo html_entity_decode(json_encode($return));
+}
 
 
-    function muuta_demo(){
-        global $dbcon;
-        $return = $_POST;
-
-        $sql = "UPDATE kysymys SET demokys = '".$return['value']."' where id ='".$return['id']."'";
-        if ($dbcon->query($sql) === TRUE) {
-            $return['joo'] = 'Tietokanta päivitetty';
-        } else {
-            $return['joo'] = "Error: " . $sql . "<br>" . $dbcon->error;
-        }   
-
-        echo html_entity_decode(json_encode($return));
-    }
+function muuta_demo(){
+	global $dbcon;
+	$return = $_POST;
+	
+	//lisää / poistaa kysymyksen demokysymyksistä
+	
+	$sql = "UPDATE kysymys SET demokys = '".$return['value']."' where id ='".$return['id']."'";
+	if ($dbcon->query($sql) === TRUE) {
+		$return['joo'] = 'Tietokanta päivitetty';
+	} else {
+		$return['joo'] = "Error: " . $sql . "<br>" . $dbcon->error;
+	}   
+		
+	echo html_entity_decode(json_encode($return));
+}
   
   
   

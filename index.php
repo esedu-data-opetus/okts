@@ -15,6 +15,7 @@ if(!isset($_SESSION)) {
      $_SESSION['id']="";
      $_SESSION['kysejar']=array(array());
      $_SESSION['catego']=0;
+     $_SESSION['cat_varasto']=array();
      $_SESSION['vastattu']=1;
      $_SESSION['kyspercat']=5;
 }
