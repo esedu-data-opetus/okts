@@ -10,14 +10,14 @@ and open the template in the editor.
 // Inialize session
 if(!isset($_SESSION)) {
      session_start();
-     $_SESSION['kysenum'] = 0;
-     $_SESSION['user'] = "";
-     $_SESSION['id']="";
-     $_SESSION['kysejar']=array(array());
-     $_SESSION['catego']=0;
-     $_SESSION['cat_varasto']=array();
-     $_SESSION['vastattu']=1;
-     $_SESSION['kyspercat']=5;
+     $_SESSION['kysenum'] = 0; 	//nykyinen kysymys
+     $_SESSION['user'] = ""; 	//käyttäjän nimi id
+     $_SESSION['id']="";		//kyselyn id
+     $_SESSION['kysejar']=array(array());	//järjestys, jossa kysymykset kysytään
+     $_SESSION['catego']=0;					//nykyinen kategoria
+     $_SESSION['cat_varasto']=array();		//varasto valituista kategorioista
+     $_SESSION['vastattu']=1;				//vastattujen kysymysten määrä
+     $_SESSION['kyspercat']=5;				//kysymysten määrä per kategoria
 }
   ?>
         <meta charset="UTF-8">

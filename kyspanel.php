@@ -7,6 +7,7 @@
 <select name="kategoria" id="alleycatblues">
     <option value=""> </option>
     <?php
+		//hakee kaikki kategoriat pudotusvalikkoon
         $query = $dbcon->query("SELECT * FROM kategoriat");
         	while($row = $query->fetch_object()){
                    echo "<option value='".$row->catid."'>".$row->catname."</option>";
